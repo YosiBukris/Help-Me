@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CustemerLogIn">
+
+    <TextView
+        android:id="@+id/TitleCusLog"
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:background="#E1E3EC"
+        android:text="Help-Me!"
+        android:layout_marginTop="50dp"
+        android:textAlignment="center"
+        android:textSize="45dp"
+        android:textStyle="bold|normal"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="60dp" />
+
+    <LinearLayout
+        android:id="@+id/LinearCusLog"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_above="@id/conectBTN"
+        android:layout_below="@id/TitleCusLog"
+        android:layout_centerInParent="true">
+
+    <EditText
+        android:id="@+id/customerEditName"
+        android:layout_width="327dp"
+        android:layout_height="66dp"
+        android:layout_below="@id/TitleCusLog"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:hint="Enter Your Name"
+        android:inputType="textCapSentences"
+        android:shadowColor="@android:color/white"
+        android:textAlignment="center"
+        android:textSize="30dp"
+        android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Choose your place"
+            android:textSize="30dp"
+            android:textAlignment="center"></TextView>
+
+
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            ></ListView>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/costomerConnectBTN"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentBottom="true"
+        android:text="CONNECT" />
+
+
+</RelativeLayout>
