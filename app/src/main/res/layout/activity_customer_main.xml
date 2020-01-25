@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CustomerMain">
+
+    <TextView
+        android:id="@+id/TitleCusLog"
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:background="#E1E3EC"
+        android:text="HelpMe"
+        android:textAlignment="center"
+        android:textSize="45dp"
+        android:textStyle="bold|normal"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="60dp" />
+
+    <TextView
+        android:id="@+id/name_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello"
+        android:layout_below="@id/TitleCusLog"
+        android:textSize="30dp"
+        android:layout_centerInParent="true"/>
+    <TextView
+        android:id="@+id/place_name_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/name_textView"
+        android:layout_centerInParent="true"/>
+
+
+        <Button
+            android:id="@+id/cameraBTN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Take a photo"/>
+
+        <ImageView
+            android:id="@+id/photo_image_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="30dp"
+            android:layout_above="@id/sendBTN"
+            android:layout_below="@id/name_textView"/>
+
+        <TextView
+            android:id="@+id/sendBTN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send photo"
+            android:textSize="30dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
+            android:layout_alignParentBottom="true"
+            android:textStyle="bold|normal"
+            android:textColor="@android:color/holo_blue_dark"
+            />
+
+
+
+
+</RelativeLayout>

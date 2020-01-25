@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "36383138637",
+    "firebase_url": "https://helpme-45025.firebaseio.com",
+    "project_id": "helpme-45025",
+    "storage_bucket": "helpme-45025.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:36383138637:android:993fc4609f1d839ea5cd04",
+        "android_client_info": {
+          "package_name": "com.example.helpme"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "36383138637-d147up6gjpfhu50pmhf4ka0p926eeeq0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.helpme",
+            "certificate_hash": "fe02665d33bc5f09066c9558e3d64f331acd74d8"
+          }
+        },
+        {
+          "client_id": "36383138637-mprf0sl52pcfcgn28e8llrfq8hkvu5dm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.helpme",
+            "certificate_hash": "83fd99ef7d885ef47ec366ece34c49047520bc7e"
+          }
+        },
+        {
+          "client_id": "36383138637-tqfmmkm9a8sv6gjmgof5c04itae5d6t6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMoc01Y9TBeqDi4aZs-FLbXfidYlBnZGI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "36383138637-tqfmmkm9a8sv6gjmgof5c04itae5d6t6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

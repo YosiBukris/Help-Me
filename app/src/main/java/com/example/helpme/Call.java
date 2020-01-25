@@ -8,7 +8,7 @@ public class Call {
     private ImageView pic;
     private String workerCall;
     private boolean done = false;
-
+    //massage
     public Call(String customerNumber, ImageView pic) {
         this.customerNumber = customerNumber;
         this.pic = pic;
