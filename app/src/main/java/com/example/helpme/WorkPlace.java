@@ -1,6 +1,7 @@
 package com.example.helpme;
 
 import android.graphics.Picture;
+import android.widget.ImageView;
 
 import java.util.Queue;
 
@@ -23,7 +24,7 @@ public class WorkPlace {
         numOfWorkers--;
     }
 
-    public void addCall(String customerName, Picture pic){
+    public void addCall(String customerName, ImageView pic){
         workPlaceCalls.add(new Call(customerName,pic));
     }
 
