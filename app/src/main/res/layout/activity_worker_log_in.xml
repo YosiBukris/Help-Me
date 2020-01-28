@@ -29,23 +29,24 @@
             android:layout_centerInParent="true">
 
             <EditText
-                android:id="@+id/workerEditName"
+                android:id="@+id/workerEditID"
                 android:layout_width="327dp"
-                android:layout_height="66dp"
+                android:layout_height="50dp"
                 android:layout_below="@id/TitleCusLog"
                 android:layout_gravity="center"
                 android:layout_marginTop="30dp"
-                android:hint="Enter Your Name"
-                android:inputType="textCapSentences"
+                android:hint="Enter Your ID"
+                android:inputType="numberDecimal"
                 android:shadowColor="@android:color/white"
                 android:textAlignment="center"
-                android:textSize="30dp"
+                android:textSize="20dp"
                 android:textStyle="bold" />
+
 
             <EditText
                 android:id="@+id/workplaceCode"
                 android:layout_width="327dp"
-                android:layout_height="66dp"
+                android:layout_height="50dp"
                 android:layout_below="@id/TitleCusLog"
                 android:layout_gravity="center"
                 android:layout_marginTop="30dp"
@@ -53,16 +54,24 @@
                 android:inputType="numberDecimal"
                 android:shadowColor="@android:color/white"
                 android:textAlignment="center"
-                android:textSize="30dp"
+                android:textSize="20dp"
                 android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/managerConnectBTN"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:layout_alignParentBottom="true"
+                android:text="Manager Page" />
 
             <Button
                 android:id="@+id/workerConnectBTN"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="10dp"
                 android:layout_alignParentBottom="true"
-                android:text="CONNECT" />
+                android:text="Worker Page" />
 
         </LinearLayout>
 

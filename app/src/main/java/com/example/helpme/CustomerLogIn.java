@@ -36,31 +36,25 @@ import java.util.concurrent.TimeUnit;
 
 public class CustomerLogIn extends AppCompatActivity {
     private final String TAG="CustomerLogIn";
+    private final String PHONE_NUM="PhoneNum";
     private Button send_verification_Btn;
     private Button verify_code_Btn;
     private EditText cellPhoneNumber;
     private Spinner spinner;
     private ProgressBar progress_bar_phone_num;
-    private FirebaseAuth mFireBaseAuth;
     private String mVerificationId;
-
-    private String completeNum;
-    private DatabaseReference mDatabaseReference;
+    public static String completeNum;
     private EditText mCodeText;
     private int whatToDo=0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_log_in);
-
         initViews();
         initSpinner();
         logIn();
-
     }
-
-
-
 
     private void initViews() {
         send_verification_Btn=(Button)findViewById(R.id.send_verification_Btn);
@@ -73,8 +67,8 @@ public class CustomerLogIn extends AppCompatActivity {
         progress_bar_phone_num.setVisibility(View.INVISIBLE);
         mCodeText=(EditText)findViewById(R.id.codeText);
         mCodeText.setVisibility(View.INVISIBLE);
-
     }
+
     private void initSpinner() {
         spinner.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,CountryData.countryNames));
     }
@@ -82,8 +76,6 @@ public class CustomerLogIn extends AppCompatActivity {
     private void createCellPhoneNumber() {
         String code= CountryData.countryAreaCodes[spinner.getSelectedItemPosition()];
         String number=cellPhoneNumber.getText().toString().trim();
-
-
         if(number.isEmpty() || number.length() < 10){
             cellPhoneNumber.setError("Valid number is required");
             cellPhoneNumber.requestFocus();
@@ -93,7 +85,7 @@ public class CustomerLogIn extends AppCompatActivity {
         if(number.charAt(0)=='0'){
             number=number.substring(1);
         }
-        completeNum="+" + code +""+ number;
+        completeNum="+" + code + number;
     }
 
     private void logIn() {
@@ -167,11 +159,11 @@ public class CustomerLogIn extends AppCompatActivity {
 
 
     private void addNumberToDatabase(){
-        mDatabaseReference.push().setValue(completeNum);
+        StartActivity.mDatabaseReferenceAuth.push().setValue(completeNum);
     }
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
-        mFireBaseAuth.signInWithCredential(credential)
+        StartActivity.mFireBaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -186,7 +178,6 @@ public class CustomerLogIn extends AppCompatActivity {
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
                             finish();
-                            // ...
                         } else {
                             // Sign in failed, display a message and update the UI
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
@@ -199,13 +190,8 @@ public class CustomerLogIn extends AppCompatActivity {
     }
 
 
-    private void initFirebase(){
-        mFireBaseAuth= FirebaseAuth.getInstance();
-        mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("cellPhone");
-    }
-
     private void userExists(){
-        mDatabaseReference.addValueEventListener(new ValueEventListener() {
+        StartActivity.mDatabaseReferenceAuth.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -218,6 +204,7 @@ public class CustomerLogIn extends AppCompatActivity {
                         }
                     }
                     if (foundUser) {
+                        completeNum = StartActivity.mFireBaseAuth.getCurrentUser().getPhoneNumber();
                         Toast.makeText(getApplicationContext(),
                                 "User exists...login succeeded", Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(CustomerLogIn.this, ListPlacesActivity.class);
@@ -240,7 +227,6 @@ public class CustomerLogIn extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        initFirebase();
         userExists();
 
     }

@@ -4,10 +4,10 @@ import android.graphics.Picture;
 import android.widget.ImageView;
 
 public class Call {
-    private String customerNumber;
-    private ImageView pic;
-    private String workerCall;
-    private boolean done = false;
+    public String customerNumber;
+    public ImageView pic;
+    public String workerCall;
+    public boolean done = false;
     //massage
     public Call(String customerNumber, ImageView pic) {
         this.customerNumber = customerNumber;

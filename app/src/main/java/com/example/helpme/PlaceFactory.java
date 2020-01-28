@@ -5,18 +5,18 @@ import java.util.Collections;
 
 public class PlaceFactory {
 
-    private ArrayList<Place> arrayList=new ArrayList<>();
+    private ArrayList<WorkPlace> arrayList=new ArrayList<>();
     private static int index = -1;
 
-    public PlaceFactory(ArrayList<Place> arrayList) {
+    public PlaceFactory(ArrayList<WorkPlace> arrayList) {
         this.arrayList = arrayList;
     }
 
     public PlaceFactory() {
-        this.arrayList = new ArrayList<Place>();
+        this.arrayList = new ArrayList<WorkPlace>();
     }
 
-    public void addPlace(Place p){
+    public void addPlace(WorkPlace p){
         arrayList.add(p);
     }
 
@@ -24,17 +24,37 @@ public class PlaceFactory {
         Collections.sort(arrayList);
     }
 
-    public Place getPlace(){
+    public WorkPlace getPlace(){
         index++;
         return arrayList.get(index);
     }
 
+    public ArrayList<WorkPlace> getArrayList() {
+        return arrayList;
+    }
+
+    public void setArrayList(ArrayList<WorkPlace> arrayList) {
+        this.arrayList = arrayList;
+    }
+
+    public static int getIndex() {
+        return index;
+    }
+
     public ArrayList<String> returnNames(){
         ArrayList<String> places = new ArrayList<>();
-        for (Place p : arrayList){
+        for (WorkPlace p : arrayList){
             places.add(p.getName());
         }
         return places;
+    }
+
+    public ArrayList<String> returnCodes(){
+        ArrayList<String> codes = new ArrayList<>();
+        for (WorkPlace p : arrayList){
+            codes.add(p.getCode());
+        }
+        return codes;
     }
 
 }

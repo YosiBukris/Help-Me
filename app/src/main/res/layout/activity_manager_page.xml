@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ManagerPage">
+
+    <TextView
+        android:id="@+id/TitleManLog"
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:background="#E1E3EC"
+        android:text="HelpMe"
+        android:textAlignment="center"
+        android:textSize="45dp"
+        android:textStyle="bold|normal"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="60dp" />
+
+    <TextView
+        android:id="@+id/name_man_TV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello"
+        android:layout_below="@id/TitleManLog"
+        android:textSize="30dp"
+        android:layout_centerInParent="true"/>
+
+    <Button
+        android:id="@+id/UpdateEmployees"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Update Employees"/>
+
+
+    <FrameLayout
+        android:id="@+id/addEmpFreg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/UpdateEmployees">
+        </FrameLayout>
+
+
+</RelativeLayout>

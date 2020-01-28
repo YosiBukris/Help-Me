@@ -22,6 +22,7 @@ public class CustomerMain extends AppCompatActivity {
     private final String PLACE="Place: ";
     private final String CUSTOMER_NAME="customerName";
     private final String NAME_OF_PLACE="nameOfPlace";
+    private final String PHONE_NUM="PhoneNum";
     private Button cameraBtn;
     private TextView sendBtn;
     private ImageView returnPhoto;
@@ -29,6 +30,7 @@ public class CustomerMain extends AppCompatActivity {
     private TextView place;
     private String intentName;
     private String intentPlace;
+    private WorkPlace currentPlace;
     private boolean photoExists=false;
 
     @Override
@@ -52,6 +54,10 @@ public class CustomerMain extends AppCompatActivity {
     private void getNameAndStoreFromCustomerMain(){
         intentName=getIntent().getStringExtra(CUSTOMER_NAME);
         intentPlace=getIntent().getStringExtra(NAME_OF_PLACE);
+        for(WorkPlace p : StartActivity.places.getArrayList()){
+            if(p.getName().equals(intentPlace))
+                currentPlace = p;
+        }
         name.setText(HI + intentName);
         place.setText(PLACE + intentPlace);
     }
@@ -71,6 +77,8 @@ public class CustomerMain extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     if(photoExists) {
+                        Log.d("hodsdsd", "onClick: " + CustomerLogIn.completeNum);
+                        currentPlace.addCall(CustomerLogIn.completeNum,returnPhoto);
                         Toast.makeText(CustomerMain.this,
                                 "Your request has been sent", Toast.LENGTH_SHORT).show();
                         //here enter cloud messaging

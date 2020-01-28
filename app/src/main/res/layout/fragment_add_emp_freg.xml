@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".addEmpFreg">
+
+    <!-- TODO: Update blank fragment layout -->
+    <TextView
+        android:id="@+id/TitleFregLog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="#E1E3EC"
+        android:text="Update Employees"
+        android:textAlignment="center"
+        android:textSize="25dp"
+        android:textStyle="bold|normal"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="60dp" />
+
+    <LinearLayout
+        android:id="@+id/mainLinearFreg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/chooseLinearFreg"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_height="70dp">
+
+            <Button
+            android:id="@+id/DelBTNFreg"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:background="@drawable/button_round"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="10dp"
+            android:text="Delete " />
+
+            <Button
+                android:id="@+id/AddBTNFreg"
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/button_round"
+                android:layout_marginTop="15dp"
+                android:text="Add" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/LinearFreg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/nameNewEmp"
+                android:layout_width="150dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:background="@drawable/edit_round"
+                android:hint="Enter name"
+                android:inputType="text"
+                android:shadowColor="@android:color/white"
+                android:textAlignment="center"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/idNewEmp"
+                android:layout_width="150dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edit_round"
+                android:hint="Enter ID"
+                android:inputType="numberDecimal"
+                android:shadowColor="@android:color/white"
+                android:textAlignment="center"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/phoneNewEmp"
+                android:layout_width="150dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/edit_round"
+                android:hint="Phone number"
+                android:inputType="phone"
+                android:shadowColor="@android:color/white"
+                android:textAlignment="center"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/commitAddEmp"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_below="@id/phoneNewEmp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/button_round"
+                android:text="Add Employee" />
+
+            <Button
+                android:id="@+id/commitDelEmp"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:background="@drawable/button_round"
+                android:text="Delete Employee" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
