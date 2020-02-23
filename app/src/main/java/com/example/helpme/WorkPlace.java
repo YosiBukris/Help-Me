@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Picture;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -16,16 +18,18 @@ import java.util.Map;
 import java.util.Queue;
 
 public class WorkPlace implements Comparable {
+    private final String UPLOADS = "uploads";
     private String name;
     private String code;
     private int numOfWorkers = 0;
-    private Queue<Call> workPlaceCalls;
+    private ArrayList<Call> uploads;
     private Employee manager;
     private Map<String,Employee> employees;
 
-    public WorkPlace(String name, String code, int maxWorkers, Employee manager) {
+    public WorkPlace(String name, String code, int maxWorkers, Employee manager, ArrayList<Call> uploads) {
         this.code = code;
         this.name = name;
+        this.uploads = uploads;
         this.manager = manager;
         employees = new HashMap<>();
     }
@@ -46,12 +50,14 @@ public class WorkPlace implements Comparable {
         numOfWorkers--;
     }
 
-    public void addCall(String customerPhone, ImageView pic){
+    public void addCall(String customerPhone, ImageView pic, Uri mImap){
         Bitmap bitmap = ((BitmapDrawable) pic.getDrawable()).getBitmap();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
         StartActivity.storageRef.child(this.name).child("workPlaceCalls").child(customerPhone).putBytes(data);
+        Log.d("miamp", "addCall: " + mImap);
+        StartActivity.mDatabaseReferencePlaces.child(this.name).child(UPLOADS).setValue(new Call(customerPhone,mImap));
         if(employees==null){
             return;
         }
@@ -61,7 +67,7 @@ public class WorkPlace implements Comparable {
     }
 
     private void sendAlert(Employee e) {
-
+        //send alert all over the employee
     }
 
     public String getName() {
@@ -96,12 +102,12 @@ public class WorkPlace implements Comparable {
         return numOfWorkers;
     }
 
-    public Queue<Call> getWorkPlaceCalls() {
-        return workPlaceCalls;
+    public ArrayList<Call> getWorkPlaceCalls() {
+        return uploads;
     }
 
     public void responseCall(Employee worker){
-        workPlaceCalls.poll().Response(worker.getName());
+        //uploads.g().Response(worker.getName());
     }
 
     @Override

@@ -58,7 +58,7 @@ public class WorkerLogIn extends AppCompatActivity {
                                         "login succeeded", Toast.LENGTH_LONG).show();
                                 StartActivity.mDatabaseReferencePlaces.child(p.getName()).child("employees").child(e.getId()).child("isConnected").setValue(true);
                                 Intent intent = new Intent(WorkerLogIn.this, WorkerMain.class);
-                                intent.putExtra(WORK_PLACE, p.getName());
+                                intent.putExtra(WORK_PLACE, p.getCode());
                                 intent.putExtra(EMPLOYEE, e.getName());
                                 startActivity(intent);
                             }
