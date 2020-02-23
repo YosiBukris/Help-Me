@@ -135,7 +135,6 @@ public class CustomerMain extends AppCompatActivity {
             returnPhoto.setImageBitmap(bitmap);
             photoExists = true;
             mImapPic = data.getData();
-
             Log.d(TAG, "onActivityResult: " + mImapPic);
         }else{
             Intent intent=new Intent(this,CustomerMain.class);
