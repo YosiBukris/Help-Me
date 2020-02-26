@@ -1,6 +1,7 @@
 package com.example.helpme;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Picture;
 import android.graphics.drawable.BitmapDrawable;
@@ -8,6 +9,14 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -18,7 +27,7 @@ import java.util.Map;
 import java.util.Queue;
 
 public class WorkPlace implements Comparable {
-    private final String UPLOADS = "uploads";
+    private final String UPLOADS = "Uploads";
     private String name;
     private String code;
     private int numOfWorkers = 0;
@@ -50,14 +59,30 @@ public class WorkPlace implements Comparable {
         numOfWorkers--;
     }
 
-    public void addCall(String customerPhone, ImageView pic, Uri mImap){
-        Bitmap bitmap = ((BitmapDrawable) pic.getDrawable()).getBitmap();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] data = baos.toByteArray();
-        StartActivity.storageRef.child(this.name).child("workPlaceCalls").child(customerPhone).putBytes(data);
-        Log.d("miamp", "addCall: " + mImap);
-        StartActivity.mDatabaseReferencePlaces.child(this.name).child(UPLOADS).setValue(new Call(customerPhone,mImap));
+    public void addCall(final String customerPhone, ImageView pic, Uri imageUri){
+        final StorageReference filePath=StartActivity.storageRef.child(this.name).child("workPlaceCalls").child("image"+ imageUri.getLastPathSegment());
+        filePath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Log.d("hodd", "onSuccess: " + uri);
+                        StartActivity.mDatabaseReferencePlaces.child(name).child(UPLOADS).child(customerPhone).setValue(new Call(customerPhone,String.valueOf(uri)))
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+
+                                        Log.d("Wrokplace", "onComplete: isSeccessful");
+                                    }
+                                });
+                    }
+                });
+            }
+        });
+
+
+//        StartActivity.mDatabaseReferencePlaces.child(this.name).child(UPLOADS).setValue(mImap);
         if(employees==null){
             return;
         }
@@ -67,7 +92,7 @@ public class WorkPlace implements Comparable {
     }
 
     private void sendAlert(Employee e) {
-        //send alert all over the employee
+        //send alert all over the employee in the same store
     }
 
     public String getName() {

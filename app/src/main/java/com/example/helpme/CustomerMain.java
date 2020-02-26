@@ -2,14 +2,19 @@ package com.example.helpme;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 
+import android.Manifest;
 import android.app.Notification;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.Image;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -29,9 +34,13 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import org.w3c.dom.Text;
 
+import java.io.File;
+
 import static androidx.constraintlayout.widget.Constraints.TAG;
 
 public class CustomerMain extends AppCompatActivity {
+    private static final int PERMISSION_CODE=1000;
+    private static final int IMAGE_CAPTURE_CODE=1001;
     private final String HI="Hi ";
     private final String PLACE="Place: ";
     private final String CUSTOMER_NAME="customerName";
@@ -45,7 +54,8 @@ public class CustomerMain extends AppCompatActivity {
     private String intentName;
     private String intentPlace;
     private WorkPlace currentPlace;
-    private Uri mImapPic;
+    private Uri imageUri;
+    public static FirebaseService fireBase;
     private boolean photoExists=false;
 
     @Override
@@ -56,7 +66,8 @@ public class CustomerMain extends AppCompatActivity {
         getNameAndStoreFromCustomerMain();
         clickToTakeAPhoto();
         sendAlertToWorker();
-
+        fireBase = new FirebaseService();
+        FirebaseService.createChannelAndHandleNotifications(this);
     }
 
     private void initClientService() {
@@ -103,10 +114,44 @@ public class CustomerMain extends AppCompatActivity {
         cameraBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(intent,0);
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+                    if(checkSelfPermission(Manifest.permission.CAMERA)== PackageManager.PERMISSION_DENIED ||checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)== PackageManager.PERMISSION_DENIED){
+                        String[] permission={Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                        requestPermissions(permission,PERMISSION_CODE);
+                    }
+                    else{
+                        openCamera();
+                    }
+                }
+                else{
+                    openCamera();
+                }
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch(requestCode){
+            case PERMISSION_CODE:{
+                if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                    openCamera();
+                }
+                else{
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    private void openCamera(){
+        ContentValues values =new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE,"New Picture");
+        values.put(MediaStore.Images.Media.DESCRIPTION,"From The Camera");
+        imageUri=getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,values);
+        Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
+        startActivityForResult(intent,IMAGE_CAPTURE_CODE);
     }
 
     private void sendAlertToWorker() {
@@ -114,7 +159,8 @@ public class CustomerMain extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     if(photoExists) {
-                        currentPlace.addCall(CustomerLogIn.completeNum,returnPhoto, mImapPic);//here we send alert to employees
+                        currentPlace.addCall(CustomerLogIn.completeNum,returnPhoto, imageUri);
+                        fireBase.sendNotification("new Call In " + currentPlace.getName());
                         Toast.makeText(CustomerMain.this,
                                 "Your request has been sent", Toast.LENGTH_SHORT).show();
                     }else{
@@ -129,15 +175,13 @@ public class CustomerMain extends AppCompatActivity {
     //func for camera activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(data!=null) {
-            super.onActivityResult(requestCode, resultCode, data);
-            Bitmap bitmap=(Bitmap)data.getExtras().get("data");
-            returnPhoto.setImageBitmap(bitmap);
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode ==RESULT_OK) {
+            returnPhoto.setImageURI(imageUri);
             photoExists = true;
-            mImapPic = data.getData();
-            Log.d(TAG, "onActivityResult: " + mImapPic);
         }else{
             Intent intent=new Intent(this,CustomerMain.class);
+            setResult(RESULT_OK, intent);
             startActivity(intent);
             finish();
         }

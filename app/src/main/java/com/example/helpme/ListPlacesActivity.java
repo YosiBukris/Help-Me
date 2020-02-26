@@ -33,7 +33,7 @@ public class ListPlacesActivity extends AppCompatActivity {
     private String nameOfChosePlace;
     private boolean isChoosePlace=false;
     private TextView nameEditText;
-    private Button confirmBtn;
+    private ImageView confirmBtn;
     private String completeNum;
 
     private Map<Integer,String> placeMap;
@@ -49,7 +49,7 @@ public class ListPlacesActivity extends AppCompatActivity {
     }
 
     private void initViews(){
-        confirmBtn=(Button) findViewById(R.id.confirmBtn);
+        confirmBtn=(ImageView)findViewById(R.id.confirmBtn);
         nameEditText=(EditText)findViewById(R.id.customerEditName);
         listView=(ListView)findViewById(R.id.listView);
         //completeNum = getIntent().getStringExtra(PHONE_NUM);

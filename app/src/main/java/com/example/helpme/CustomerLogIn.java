@@ -45,7 +45,7 @@ public class CustomerLogIn extends AppCompatActivity {
     private String mVerificationId;
     public static String completeNum;
     private EditText mCodeText;
-    private int whatToDo=0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -187,47 +187,5 @@ public class CustomerLogIn extends AppCompatActivity {
                         }
                     }
                 });
-    }
-
-
-    private void userExists(){
-        StartActivity.mDatabaseReferenceAuth.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
-                    boolean foundUser = false;
-                    for (DataSnapshot mDataSnapshot1 : dataSnapshot.getChildren()) {
-                        if (mDataSnapshot1.getValue().toString().equals(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())) {
-                            foundUser = true;
-                        }
-                    }
-                    if (foundUser) {
-                        completeNum = StartActivity.mFireBaseAuth.getCurrentUser().getPhoneNumber();
-                        Toast.makeText(getApplicationContext(),
-                                "User exists...login succeeded", Toast.LENGTH_LONG).show();
-                        Intent intent = new Intent(CustomerLogIn.this, ListPlacesActivity.class);
-                        startActivity(intent);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-            }
-        });
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        userExists();
-
     }
 }

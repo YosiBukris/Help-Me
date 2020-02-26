@@ -22,23 +22,31 @@
         android:id="@+id/worker_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textSize="16dp"
         android:layout_centerInParent="true"
-        android:layout_below="@id/TitleWorkMain"
-        android:layout_above="@id/workMainlistView"/>
+        android:layout_below="@id/TitleWorkMain" />
 
     <TextView
         android:id="@+id/place_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textSize="16dp"
         android:layout_centerInParent="true"
-        android:layout_below="@id/worker_name"
-        android:layout_above="@id/workMainlistView"/>
+        android:layout_below="@id/worker_name" />
 
     <ListView
         android:id="@+id/workMainlistView"
         android:layout_width="match_parent"
-        android:layout_below="@+id/TitleWorkMain"
+        android:layout_below="@id/place_name"
+        android:layout_above="@id/location_photo"
         android:layout_height="wrap_content">
     </ListView>
+    <ImageView
+        android:id="@+id/location_photo"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:foregroundGravity="center"
+        android:layout_alignParentBottom="true"/>
+
 
 </RelativeLayout>

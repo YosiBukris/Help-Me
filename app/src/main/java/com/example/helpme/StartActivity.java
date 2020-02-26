@@ -28,9 +28,13 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import android.content.Intent;
+import android.util.Log;
+import android.widget.TextView;
+import android.widget.Toast;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class StartActivity extends AppCompatActivity {
     private Button customerBtn;
@@ -49,6 +53,10 @@ public class StartActivity extends AppCompatActivity {
         void DataIsUpdated();
         void DataIsDeleted();
     }
+    public static StartActivity mainActivity;
+    public static Boolean isVisible = false;
+    private static final String TAG = "MainActivity";
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +85,56 @@ public class StartActivity extends AppCompatActivity {
 
             }
         });
+        mainActivity = this;
+        registerWithNotificationHubs();
+        FirebaseService.createChannelAndHandleNotifications(getApplicationContext());
         startIntents();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isVisible = false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isVisible = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isVisible = false;
+    }
+
+    public void ToastNotify(final String notificationMessage) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(mainActivity, notificationMessage, Toast.LENGTH_LONG).show();
+                TextView helloText = (TextView) findViewById(R.id.aboutBTN);
+                helloText.setText(notificationMessage);
+            }
+        });
+    }
+
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            } else {
+                Log.i(TAG, "This device is not supported by Google Play Services.");
+                Toast.makeText(this,"This device is not supported by Google Play Services.",Toast.LENGTH_LONG).show();
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 
     private void initPlaces(final DataStatus dataStatus) {
@@ -101,8 +158,17 @@ public class StartActivity extends AppCompatActivity {
     private void initViews(){
         customerBtn=(Button)findViewById(R.id.customerBTN);
         workerBtn=(Button)findViewById(R.id.workerBTN);
-        aboutBtn=(Button)findViewById(R.id.aboutBTN);
+        //aboutBtn=(Button)findViewById(R.id.aboutBTN);
         places = new PlaceFactory();
+    }
+
+    public void registerWithNotificationHubs()
+    {
+        if (checkPlayServices()) {
+            // Start IntentService to register this application with FCM.
+            Intent intent = new Intent(this, RegistrationIntentService.class);
+            startService(intent);
+        }
     }
 
     private void startIntents(){
@@ -127,13 +193,13 @@ public class StartActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        aboutBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent=new Intent(StartActivity.this,About.class);
-                startActivity(intent);
-            }
-        });
+//        aboutBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent intent=new Intent(StartActivity.this,About.class);
+//                startActivity(intent);
+//            }
+//        });
     }
 
     private void initFirebase(){
@@ -145,19 +211,6 @@ public class StartActivity extends AppCompatActivity {
     }
 
     public void updateDataBase(){
-//        WorkPlace Renuar = new WorkPlace("Renuar","12345", 10, new Employee("Yosi", "308464239", "0509808050"));
-//        Renuar.addWorker(new Employee("tal","1234","0523976905"));
-//        Renuar.addWorker(new Employee("hod","4567", "526327767"));
-//        Renuar.addWorker(new Employee("jos","4321", "0509808050"));
-//        places.addPlace(Renuar);
-//        places.addPlace(new WorkPlace("Castro","23423410",10, new Employee("Yosi", "308464239", "0509808050")));
-//        places.addPlace(new WorkPlace("Zara","17556",10, new Employee("Yosi", "308464239", "0509808050")));
-//        places.addPlace(new WorkPlace("Bershka","78978",10, new Employee("Yosi", "308464239", "0509808050")));
-//        places.addPlace(new WorkPlace("Billabong","8954",10, new Employee("Yosi", "308464239", "0509808050")));
-//        places.addPlace(new WorkPlace("Adidas","99654",10, new Employee("Yosi", "308464239", "0509808050")));
-//        places.addPlace(new WorkPlace("Nike","8654",10, new Employee("Yosi", "308464239", "0509808050")));
-//        places.sortPlaces();
-//        mDatabaseReferencePlaces.setValue("Places");
         for(WorkPlace p : places.getArrayList()){
             mDatabaseReferencePlaces.child(p.getName()).setValue(p);
         }
@@ -189,6 +242,7 @@ public class StartActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        isVisible = true;
         ///---------------------active this after we finish----- this method check if user exists----------
         userExists();
 //        addPlacesToDatabase();
