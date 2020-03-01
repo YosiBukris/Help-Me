@@ -16,6 +16,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
@@ -27,11 +31,11 @@ public class addEmpFreg extends Fragment {
     private final String DELETE = "delete";
     private final String ADD = "add";
     private String name;
-    private String id;
+    private String mail;
     private String phone;
     private TextView title;
     private EditText nameTXT;
-    private EditText IDTXT;
+    private EditText MAILTXT;
     private EditText phoneTXT;
     private Button addEmpBTN;
     private Button delEmpBTN;
@@ -48,7 +52,7 @@ public class addEmpFreg extends Fragment {
         View v = inflater.inflate(R.layout.fragment_add_emp_freg, container, false);
         title = v.findViewById(R.id.TitleFregLog);
         nameTXT = v.findViewById(R.id.nameNewEmp);
-        IDTXT = v.findViewById(R.id.idNewEmp);
+        MAILTXT = v.findViewById(R.id.emailNewEmp);
         phoneTXT = v.findViewById(R.id.phoneNewEmp);
         addEmpBTN = v.findViewById(R.id.commitAddEmp);
         delEmpBTN = v.findViewById(R.id.commitDelEmp);
@@ -61,7 +65,7 @@ public class addEmpFreg extends Fragment {
 
     private void initViews() {
         nameTXT.setVisibility(View.INVISIBLE);
-        IDTXT.setVisibility((View.INVISIBLE));
+        MAILTXT.setVisibility((View.INVISIBLE));
         phoneTXT.setVisibility(View.INVISIBLE);
         addEmpBTN.setVisibility(View.INVISIBLE);
         delEmpBTN.setVisibility(View.INVISIBLE);
@@ -87,17 +91,40 @@ public class addEmpFreg extends Fragment {
             public void onClick(View v) {
                 if (checkValidation()) {
                     name = nameTXT.getText().toString();
-                    id = IDTXT.getText().toString();
+                    mail = MAILTXT.getText().toString();
                     phone = phoneTXT.getText().toString();
-                    newEmp = new Employee(name, id, phone);
+                    if(mail.isEmpty()){
+                        MAILTXT.setError("Email required");
+                        MAILTXT.requestFocus();
+                        return;
+                    }
+                    if(name.isEmpty()){
+                        nameTXT.setError("Name required");
+                        nameTXT.requestFocus();
+                        return;
+                    }
+                    newEmp = new Employee(name, mail, phone);
                     if (newEmp != null) {
-                        StartActivity.mDatabaseReferencePlaces.child(place.getName()).child("employees").child(id).setValue(newEmp);
-                        StartActivity.mDatabaseReferencePlaces.child(place.getName()).child("employees").child(id).child("isConnected").setValue(false);
+                        place.addWorker(new Employee(name,mail,phone));
+                        //StartActivity.mDatabaseReferencePlaces.child(place.getName()).child("employees").child(phone).setValue(newEmp);
                         StartActivity.mDatabaseReferencePlaces.child(place.getName()).child("numOfWorkers").setValue(place.getNumOfWorkers() + 1);
-                        thisMannagerPage.successAdd();
+                        StartActivity.mFireBaseAuth.createUserWithEmailAndPassword(mail,place.getCode()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful())
+                                    thisMannagerPage.successAdd();
+                                else {
+                                    if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                                        Toast.makeText(thisMannagerPage, "User exist", Toast.LENGTH_LONG).show();
+                                    } else
+                                        Toast.makeText(thisMannagerPage, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        });
+
                     }
                     nameTXT.setText("");
-                    IDTXT.setText("");
+                    MAILTXT.setText("");
                     phoneTXT.setText("");
                 }
             }
@@ -105,13 +132,13 @@ public class addEmpFreg extends Fragment {
         delEmpBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                id = IDTXT.getText().toString();
+                mail = MAILTXT.getText().toString();
                 phone = phoneTXT.getText().toString();
                 if (place.getEmployees() != null) {
                     for (Employee e : place.getEmployees()) {
                         if (e != null) {
-                            if (e.getId().equals(id)) {
-                                StartActivity.mDatabaseReferencePlaces.child(place.getName()).child("employees").child(id).removeValue();
+                            if (e.getId().equals(mail)) {
+                                //StartActivity.mDatabaseReferencePlaces.child(place.getName()).child("employees").child(phone).removeValue();
                                 StartActivity.mDatabaseReferencePlaces.child(place.getName()).child("numOfWorkers").setValue(place.getNumOfWorkers() - 1);
                                 thisMannagerPage.successDell();
                                 return;
@@ -127,23 +154,23 @@ public class addEmpFreg extends Fragment {
     private void checkClick(){
         if (this.action.equals(ADD)){
             nameTXT.setVisibility(View.VISIBLE);
-            IDTXT.setVisibility((View.VISIBLE));
+            MAILTXT.setVisibility((View.VISIBLE));
             phoneTXT.setVisibility(View.VISIBLE);
             addEmpBTN.setVisibility(View.VISIBLE);
             delEmpBTN.setVisibility(View.INVISIBLE);
             nameTXT.setText("");
-            IDTXT.setText("");
+            MAILTXT.setText("");
             phoneTXT.setText("");
             title.setText("Add Employee");
         }
         if(this.action.equals(DELETE)){
             nameTXT.setVisibility(View.INVISIBLE);
-            IDTXT.setVisibility((View.VISIBLE));
+            MAILTXT.setVisibility((View.VISIBLE));
             phoneTXT.setVisibility(View.VISIBLE);
             addEmpBTN.setVisibility(View.INVISIBLE);
             delEmpBTN.setVisibility(View.VISIBLE);
             nameTXT.setText("");
-            IDTXT.setText("");
+            MAILTXT.setText("");
             phoneTXT.setText("");
             title.setText("Delete Employee");
         }
@@ -156,7 +183,7 @@ public class addEmpFreg extends Fragment {
         }
         if(place.getEmployees()!=null) {
             for (Employee e : this.place.getEmployees()) {
-                if (e.getId().equals(IDTXT.getText().toString())) {
+                if (e.getId().equals(MAILTXT.getText().toString())) {
                     thisMannagerPage.failedAddId();
                     return false;
                 }
@@ -181,7 +208,4 @@ public class addEmpFreg extends Fragment {
         this.thisMannagerPage = thisPage;
     }
 
-    public void setAction(String action) {
-        this.action = action;
-    }
 }

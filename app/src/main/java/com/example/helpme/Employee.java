@@ -2,21 +2,29 @@ package com.example.helpme;
 
 import android.util.Log;
 
-public class Employee {
+import java.io.Serializable;
+
+public class Employee implements Serializable {
     private String name;
     private String id;
+    private String token;
     private String phone;
     private boolean isConnected = false;
     private WorkPlace workPlace;
+    private String Uid;
 
-    public Employee(String name, String id, String phone) {
+    public Employee(String name, String mail, String phone) {
         this.name = name;
-        this.id = id;
-        this.phone = "";
-        createCellPhoneNumber(phone);
+        this.id = mail;
+        this.phone = phone;
     }
 
-    public Employee(){
+    public Employee(String mail, String token) {
+        this.id = mail;
+        this.token = token;
+    }
+
+    public Employee() {
 
     }
 
@@ -33,13 +41,25 @@ public class Employee {
         }
     }
 
+    public void setToken (String token){
+        this.token = token;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public void setUid(String uid){this.Uid = uid;}
+
+    public String getUid() {
+        return Uid;
     }
 
     public void setName(String name) {
         this.name = name;
     }
+
+    public String getToken(){return token;}
 
     public void setPhone (String num){
         phone +=  num;

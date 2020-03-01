@@ -1,9 +1,15 @@
 package com.example.helpme;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -18,6 +24,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -25,6 +32,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -36,11 +45,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 
+import static androidx.core.app.NotificationCompat.PRIORITY_DEFAULT;
+
 public class StartActivity extends AppCompatActivity {
     private Button customerBtn;
     private Button workerBtn;
     private Button aboutBtn;
     public static PlaceFactory places;
+    public static final String CHANNEL_ID = "simplified_coding";
+    private static final String CHANNEL_NAME = "Simplified Coding";
+    private static final String CHANNEL_DESC = "Simplified Coding Notifications";
+
     public static FirebaseAuth mFireBaseAuth;
     public static DatabaseReference mDatabaseReferenceAuth;
     public static DatabaseReference mDatabaseReferencePlaces;
@@ -53,10 +68,6 @@ public class StartActivity extends AppCompatActivity {
         void DataIsUpdated();
         void DataIsDeleted();
     }
-    public static StartActivity mainActivity;
-    public static Boolean isVisible = false;
-    private static final String TAG = "MainActivity";
-    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,56 +96,13 @@ public class StartActivity extends AppCompatActivity {
 
             }
         });
-        mainActivity = this;
-        registerWithNotificationHubs();
-        FirebaseService.createChannelAndHandleNotifications(getApplicationContext());
-        startIntents();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        isVisible = false;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        isVisible = true;
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        isVisible = false;
-    }
-
-    public void ToastNotify(final String notificationMessage) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(mainActivity, notificationMessage, Toast.LENGTH_LONG).show();
-                TextView helloText = (TextView) findViewById(R.id.aboutBTN);
-                helloText.setText(notificationMessage);
-            }
-        });
-    }
-
-    private boolean checkPlayServices() {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (apiAvailability.isUserResolvableError(resultCode)) {
-                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
-                        .show();
-            } else {
-                Log.i(TAG, "This device is not supported by Google Play Services.");
-                Toast.makeText(this,"This device is not supported by Google Play Services.",Toast.LENGTH_LONG).show();
-                finish();
-            }
-            return false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            NotificationChannel channel  = new NotificationChannel(CHANNEL_ID,CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription(CHANNEL_DESC);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
         }
-        return true;
+        startIntents();
     }
 
     private void initPlaces(final DataStatus dataStatus) {
@@ -158,17 +126,8 @@ public class StartActivity extends AppCompatActivity {
     private void initViews(){
         customerBtn=(Button)findViewById(R.id.customerBTN);
         workerBtn=(Button)findViewById(R.id.workerBTN);
-        //aboutBtn=(Button)findViewById(R.id.aboutBTN);
+        aboutBtn=(Button)findViewById(R.id.aboutBTN);
         places = new PlaceFactory();
-    }
-
-    public void registerWithNotificationHubs()
-    {
-        if (checkPlayServices()) {
-            // Start IntentService to register this application with FCM.
-            Intent intent = new Intent(this, RegistrationIntentService.class);
-            startService(intent);
-        }
     }
 
     private void startIntents(){
@@ -193,13 +152,13 @@ public class StartActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-//        aboutBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent=new Intent(StartActivity.this,About.class);
-//                startActivity(intent);
-//            }
-//        });
+        aboutBtn.setOnClickListener(new View.OnClickListener() {
+               @Override
+            public void onClick(View view) {
+                   Intent intent=new Intent(StartActivity.this,About.class);
+                   startActivity(intent);
+            }
+        });
     }
 
     private void initFirebase(){
@@ -242,7 +201,6 @@ public class StartActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        isVisible = true;
         ///---------------------active this after we finish----- this method check if user exists----------
         userExists();
 //        addPlacesToDatabase();

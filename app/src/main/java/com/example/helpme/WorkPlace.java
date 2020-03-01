@@ -28,6 +28,7 @@ import java.util.Queue;
 
 public class WorkPlace implements Comparable {
     private final String UPLOADS = "Uploads";
+    private final String WORK_PLACE_CALLS = "workPlaceCalls";
     private String name;
     private String code;
     private int numOfWorkers = 0;
@@ -60,7 +61,7 @@ public class WorkPlace implements Comparable {
     }
 
     public void addCall(final String customerPhone, ImageView pic, Uri imageUri){
-        final StorageReference filePath=StartActivity.storageRef.child(this.name).child("workPlaceCalls").child("image"+ imageUri.getLastPathSegment());
+        final StorageReference filePath=StartActivity.storageRef.child(this.name).child(WORK_PLACE_CALLS).child("image"+ imageUri.getLastPathSegment());
         filePath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {

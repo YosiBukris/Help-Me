@@ -1,5 +1,6 @@
 package com.example.helpme;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -12,6 +13,9 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -22,11 +26,11 @@ import com.google.firebase.database.ValueEventListener;
 public class WorkerLogIn extends AppCompatActivity {
     private final String WORK_PLACE="WorkPlaceName";
     private final String EMPLOYEE="nameOfEmployee";
-    private EditText workerId;
+    private EditText workerMail;
     private EditText placeCode;
     private Button connectEmp;
     private Button connectMan;
-    private String empID;
+    private String empMail;
     private String placeID;
 
     @Override
@@ -38,7 +42,7 @@ public class WorkerLogIn extends AppCompatActivity {
     }
 
     private void initViews() {
-        workerId= (EditText) findViewById(R.id.workerEditID);
+        workerMail= (EditText) findViewById(R.id.workerEditMail);
         placeCode = (EditText) findViewById(R.id.workplaceCode);
         connectEmp = (Button) findViewById(R.id.workerConnectBTN);
         connectMan = (Button) findViewById(R.id.managerConnectBTN);
@@ -48,34 +52,35 @@ public class WorkerLogIn extends AppCompatActivity {
         connectEmp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                empID = workerId.getText().toString();
+                empMail = workerMail.getText().toString();
                 placeID = placeCode.getText().toString();
-                for(WorkPlace p : StartActivity.places.getArrayList()){
-                    if (p.getCode().equals(placeID)){
-                        for (Employee e : p.getEmployees()){
-                            if (e.getId().equals(empID)){
-                                Toast.makeText(getApplicationContext(),
-                                        "login succeeded", Toast.LENGTH_LONG).show();
-                                StartActivity.mDatabaseReferencePlaces.child(p.getName()).child("employees").child(e.getId()).child("isConnected").setValue(true);
-                                Intent intent = new Intent(WorkerLogIn.this, WorkerMain.class);
-                                intent.putExtra(WORK_PLACE, p.getCode());
-                                intent.putExtra(EMPLOYEE, e.getName());
-                                startActivity(intent);
-                            }
+                StartActivity.mFireBaseAuth.signInWithEmailAndPassword(empMail,placeID)
+                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()){
+                            Intent intent = new Intent(WorkerLogIn.this, WorkerMain.class);
+                            intent.putExtra(WORK_PLACE, placeID);
+                            intent.putExtra(EMPLOYEE, empMail);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
                         }
+                        else
+                            Toast.makeText(WorkerLogIn.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
-                }
+                });
             }
         });
+
         connectMan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                empID = workerId.getText().toString();
+                empMail = workerMail.getText().toString();
                 placeID = placeCode.getText().toString();
                 for (WorkPlace p : StartActivity.places.getArrayList()) {
                     if (p.getCode().equals(placeID)) {
                         if(p.getManager()!=null) {
-                            if (empID.equals(p.getManager().getId())) {
+                            if (empMail.equals(p.getManager().getId())) {
                                 Toast.makeText(getApplicationContext(),
                                         "login succeeded", Toast.LENGTH_LONG).show();
                                 Intent intent = new Intent(WorkerLogIn.this, ManagerPage.class);
@@ -89,5 +94,4 @@ public class WorkerLogIn extends AppCompatActivity {
             }
         });
     }
-
 }

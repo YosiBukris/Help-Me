@@ -27,14 +27,29 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
+import com.squareup.okhttp.ResponseBody;
 
 import org.w3c.dom.Text;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static androidx.constraintlayout.widget.Constraints.TAG;
 
@@ -55,7 +70,7 @@ public class CustomerMain extends AppCompatActivity {
     private String intentPlace;
     private WorkPlace currentPlace;
     private Uri imageUri;
-    public static FirebaseService fireBase;
+    private List<Employee> employeeList;
     private boolean photoExists=false;
 
     @Override
@@ -65,28 +80,30 @@ public class CustomerMain extends AppCompatActivity {
         initViews();
         getNameAndStoreFromCustomerMain();
         clickToTakeAPhoto();
+        loadUsers();
         sendAlertToWorker();
-        fireBase = new FirebaseService();
-        FirebaseService.createChannelAndHandleNotifications(this);
     }
 
-    private void initClientService() {
-        FirebaseInstanceId.getInstance().getInstanceId()
-                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "getInstanceId failed", task.getException());
-                            return;
-                        }
-
-                        // Get new Instance ID token
-                        String token = task.getResult().getToken();
-
-                        Log.d(TAG, token);
-                        Toast.makeText(CustomerMain.this, token, Toast.LENGTH_SHORT).show();
+    private void loadUsers() {
+        employeeList = new ArrayList<>();
+        final DatabaseReference dbUsers = FirebaseDatabase.getInstance().getReference("places").child(currentPlace.getName()).child("employees");
+        dbUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    for(DataSnapshot dsUser : dataSnapshot.getChildren()) {
+                        Employee employee = dsUser.getValue(Employee.class);
+                        employee.setUid(dsUser.getKey());
+                        employeeList.add(employee);
                     }
-                });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
 
@@ -158,9 +175,30 @@ public class CustomerMain extends AppCompatActivity {
         sendBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(photoExists) {
+                    if(photoExists && employeeList!=null) {
                         currentPlace.addCall(CustomerLogIn.completeNum,returnPhoto, imageUri);
-                        fireBase.sendNotification("new Call In " + currentPlace.getName());
+                        String title = "New Call";
+                        String body = "New call in " + currentPlace.getName() + " from " + name;
+                        for(Employee e : employeeList){
+                            String token = e.getToken();
+                            Retrofit retrofit = new Retrofit.Builder().baseUrl("https://fcm.googleapis.com/")
+                                    .addConverterFactory(GsonConverterFactory.create()).build();
+                            Api api = retrofit.create(Api.class);
+                            api.sendNotification(new Sender(new Data(StartActivity.mFireBaseAuth.getCurrentUser().getUid(),
+                                    R.drawable.helpmeicon ,body,title, e.getUid()),token)).enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    if(response.code()==200)
+                                        Log.d("ifsuccess", "onResponse: success");
+                                }
+
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                                }
+                            });
+
+                        }
                         Toast.makeText(CustomerMain.this,
                                 "Your request has been sent", Toast.LENGTH_SHORT).show();
                     }else{
@@ -179,11 +217,6 @@ public class CustomerMain extends AppCompatActivity {
         if(resultCode ==RESULT_OK) {
             returnPhoto.setImageURI(imageUri);
             photoExists = true;
-        }else{
-            Intent intent=new Intent(this,CustomerMain.class);
-            setResult(RESULT_OK, intent);
-            startActivity(intent);
-            finish();
         }
     }
 

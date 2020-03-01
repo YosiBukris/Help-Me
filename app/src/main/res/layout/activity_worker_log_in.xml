@@ -29,14 +29,14 @@
             android:layout_centerInParent="true">
 
             <EditText
-                android:id="@+id/workerEditID"
+                android:id="@+id/workerEditMail"
                 android:layout_width="327dp"
                 android:layout_height="50dp"
                 android:layout_below="@id/TitleCusLog"
                 android:layout_gravity="center"
                 android:layout_marginTop="30dp"
-                android:hint="Enter Your ID"
-                android:inputType="numberDecimal"
+                android:hint="Enter Your Mail"
+                android:inputType="text"
                 android:shadowColor="@android:color/white"
                 android:textAlignment="center"
                 android:textSize="20dp"

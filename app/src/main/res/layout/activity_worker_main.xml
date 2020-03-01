@@ -38,15 +38,14 @@
         android:id="@+id/workMainlistView"
         android:layout_width="match_parent"
         android:layout_below="@id/place_name"
-        android:layout_above="@id/location_photo"
         android:layout_height="wrap_content">
     </ListView>
-    <ImageView
-        android:id="@+id/location_photo"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:foregroundGravity="center"
-        android:layout_alignParentBottom="true"/>
+<!--    <ImageView-->
+<!--        android:id="@+id/location_photo"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="300dp"-->
+<!--        android:foregroundGravity="center"-->
+<!--        android:layout_alignParentBottom="true"/>-->
 
 
 </RelativeLayout>

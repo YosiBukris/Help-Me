@@ -57,9 +57,11 @@ public class ListPlacesActivity extends AppCompatActivity {
     }
 
     private void createListViews() {
-        ArrayAdapter arrayAdapter=
-                new ArrayAdapter(this,android.R.layout.simple_list_item_1,StartActivity.places.returnNames());
-        listView.setAdapter(arrayAdapter);
+        if(StartActivity.places!=null) {
+            ArrayAdapter arrayAdapter =
+                    new ArrayAdapter(this, android.R.layout.simple_list_item_1, StartActivity.places.returnNames());
+            listView.setAdapter(arrayAdapter);
+        }
     }
 
     //choose place
