@@ -54,21 +54,22 @@ public class WorkerLogIn extends AppCompatActivity {
             public void onClick(View view) {
                 empMail = workerMail.getText().toString();
                 placeID = placeCode.getText().toString();
-                StartActivity.mFireBaseAuth.signInWithEmailAndPassword(empMail,placeID)
-                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()){
-                            Intent intent = new Intent(WorkerLogIn.this, WorkerMain.class);
-                            intent.putExtra(WORK_PLACE, placeID);
-                            intent.putExtra(EMPLOYEE, empMail);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                        }
-                        else
-                            Toast.makeText(WorkerLogIn.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
+                if (empMail != null && placeID != null) {
+                    StartActivity.mFireBaseAuth.signInWithEmailAndPassword(empMail, placeID)
+                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isSuccessful()) {
+                                        Intent intent = new Intent(WorkerLogIn.this, WorkerMain.class);
+                                        intent.putExtra(WORK_PLACE, placeID);
+                                        intent.putExtra(EMPLOYEE, empMail);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        startActivity(intent);
+                                    } else
+                                        Toast.makeText(WorkerLogIn.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                }
             }
         });
 
@@ -77,16 +78,18 @@ public class WorkerLogIn extends AppCompatActivity {
             public void onClick(View v) {
                 empMail = workerMail.getText().toString();
                 placeID = placeCode.getText().toString();
-                for (WorkPlace p : StartActivity.places.getArrayList()) {
-                    if (p.getCode().equals(placeID)) {
-                        if(p.getManager()!=null) {
-                            if (empMail.equals(p.getManager().getId())) {
-                                Toast.makeText(getApplicationContext(),
-                                        "login succeeded", Toast.LENGTH_LONG).show();
-                                Intent intent = new Intent(WorkerLogIn.this, ManagerPage.class);
-                                intent.putExtra(WORK_PLACE, p.getName());
-                                intent.putExtra(EMPLOYEE, p.getManager().getName());
-                                startActivity(intent);
+                if (empMail != null && placeID != null) {
+                    for (WorkPlace p : StartActivity.places.getArrayList()) {
+                        if (p.getCode().equals(placeID)) {
+                            if (p.getManager() != null) {
+                                if (empMail.equals(p.getManager().getId())) {
+                                    Toast.makeText(getApplicationContext(),
+                                            "login succeeded", Toast.LENGTH_LONG).show();
+                                    Intent intent = new Intent(WorkerLogIn.this, ManagerPage.class);
+                                    intent.putExtra(WORK_PLACE, p.getName());
+                                    intent.putExtra(EMPLOYEE, p.getManager().getName());
+                                    startActivity(intent);
+                                }
                             }
                         }
                     }

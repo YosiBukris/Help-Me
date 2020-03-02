@@ -37,6 +37,7 @@
     <ListView
         android:id="@+id/workMainlistView"
         android:layout_width="match_parent"
+        android:textAlignment="center"
         android:layout_below="@id/place_name"
         android:layout_height="wrap_content">
     </ListView>

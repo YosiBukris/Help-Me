@@ -1,5 +1,6 @@
 package com.example.helpme;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
@@ -21,7 +22,11 @@ import android.util.Log;
 import android.view.DragAndDropPermissions;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -46,6 +51,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import static androidx.core.app.NotificationCompat.PRIORITY_DEFAULT;
+import static java.lang.Thread.sleep;
 
 public class StartActivity extends AppCompatActivity {
     private Button customerBtn;
@@ -55,7 +61,6 @@ public class StartActivity extends AppCompatActivity {
     public static final String CHANNEL_ID = "simplified_coding";
     private static final String CHANNEL_NAME = "Simplified Coding";
     private static final String CHANNEL_DESC = "Simplified Coding Notifications";
-
     public static FirebaseAuth mFireBaseAuth;
     public static DatabaseReference mDatabaseReferenceAuth;
     public static DatabaseReference mDatabaseReferencePlaces;
@@ -74,8 +79,18 @@ public class StartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
-        initFirebase();
-        initPlaces(new DataStatus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            NotificationChannel channel  = new NotificationChannel(CHANNEL_ID,CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription(CHANNEL_DESC);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
+        startInitPlaces();
+        startIntents();
+    }
+
+    private void startInitPlaces(){
+        initPlaces(new StartActivity.DataStatus() {
             @Override
             public void DataIsLoaded(ArrayList<WorkPlace> places) {
                 StartActivity.places.setArrayList(places);
@@ -96,13 +111,6 @@ public class StartActivity extends AppCompatActivity {
 
             }
         });
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            NotificationChannel channel  = new NotificationChannel(CHANNEL_ID,CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription(CHANNEL_DESC);
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel);
-        }
-        startIntents();
     }
 
     private void initPlaces(final DataStatus dataStatus) {

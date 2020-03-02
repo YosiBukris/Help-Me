@@ -11,7 +11,7 @@
     <TextView
         android:id="@+id/Title"
         android:layout_width="match_parent"
-        android:layout_height="96dp"
+        android:layout_height="80dp"
         android:background="#E1E3EC"
         android:text="HelpMe"
         android:textAlignment="center"
@@ -21,13 +21,14 @@
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="60dp" />
 
+
     <Button
         android:id="@+id/customerBTN"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="CUSTOMER"
         android:textColor="@android:color/white"
-        android:background="@color/colorPrimaryDark"
+        android:background="@drawable/button_confirm2"
         android:layout_centerInParent="true"
         android:layout_centerHorizontal="true"
         tools:ignore="MissingConstraints" />
@@ -38,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_below="@id/customerBTN"
-        android:background="@color/colorAccent"
+        android:background="@drawable/button_confirm"
         android:text="WORKER"
         android:layout_marginTop="10dp"
         android:layout_centerHorizontal="true"
@@ -50,7 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:background="@color/colorPrimary"
+        android:background="@drawable/button_cancel"
         android:text="ABOUT"
         android:layout_below="@id/workerBTN"
         android:textColor="@android:color/white"

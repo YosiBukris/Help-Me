@@ -10,7 +10,7 @@
         <TextView
             android:id="@+id/TitleCusLog"
             android:layout_width="match_parent"
-            android:layout_height="96dp"
+            android:layout_height="80dp"
             android:background="#E1E3EC"
             android:text="HelpMe"
             android:textAlignment="center"
@@ -35,7 +35,7 @@
                 android:layout_below="@id/TitleCusLog"
                 android:layout_gravity="center"
                 android:layout_marginTop="30dp"
-                android:hint="Enter Your Mail"
+                android:hint="Enter Your Code/Mail"
                 android:inputType="text"
                 android:shadowColor="@android:color/white"
                 android:textAlignment="center"
@@ -57,23 +57,26 @@
                 android:textSize="20dp"
                 android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/managerConnectBTN"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="50dp"
-                android:layout_alignParentBottom="true"
-                android:text="Manager Page" />
-
-            <Button
-                android:id="@+id/workerConnectBTN"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_alignParentBottom="true"
-                android:text="Worker Page" />
-
         </LinearLayout>
+
+    <Button
+        android:id="@+id/managerConnectBTN"
+        android:layout_width="150dp"
+        android:background="@drawable/button_round"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="20dp"
+        android:text="Manager Page" />
+
+    <Button
+        android:id="@+id/workerConnectBTN"
+        android:background="@drawable/button_confirm2"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="60dp"
+        android:layout_above="@+id/managerConnectBTN"
+        android:text="Worker Page" />
 
 
 

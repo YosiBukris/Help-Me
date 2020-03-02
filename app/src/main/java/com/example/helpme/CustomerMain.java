@@ -62,7 +62,7 @@ public class CustomerMain extends AppCompatActivity {
     private final String NAME_OF_PLACE="nameOfPlace";
     private final String PHONE_NUM="PhoneNum";
     private Button cameraBtn;
-    private TextView sendBtn;
+    private Button sendBtn;
     private ImageView returnPhoto;
     private TextView name;
     private TextView place;
@@ -106,13 +106,13 @@ public class CustomerMain extends AppCompatActivity {
         });
     }
 
-
     private void initViews(){
         cameraBtn =(Button)findViewById(R.id.cameraBTN);
-        sendBtn   =(TextView)findViewById(R.id.sendBTN);
+        sendBtn   =(Button) findViewById(R.id.sendBTN);
         returnPhoto=(ImageView)findViewById(R.id.photo_image_view);
         name=(TextView)findViewById(R.id.name_textView);
         place=(TextView)findViewById(R.id.place_name_textView);
+        sendBtn.setVisibility(View.INVISIBLE);
     }
 
     private void getNameAndStoreFromCustomerMain(){
@@ -125,7 +125,6 @@ public class CustomerMain extends AppCompatActivity {
         name.setText(HI + intentName);
         place.setText(PLACE + intentPlace);
     }
-
 
     private void clickToTakeAPhoto(){
         cameraBtn.setOnClickListener(new View.OnClickListener() {
@@ -197,7 +196,6 @@ public class CustomerMain extends AppCompatActivity {
 
                                 }
                             });
-
                         }
                         Toast.makeText(CustomerMain.this,
                                 "Your request has been sent", Toast.LENGTH_SHORT).show();
@@ -209,7 +207,6 @@ public class CustomerMain extends AppCompatActivity {
             });
         }
 
-
     //func for camera activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -217,6 +214,7 @@ public class CustomerMain extends AppCompatActivity {
         if(resultCode ==RESULT_OK) {
             returnPhoto.setImageURI(imageUri);
             photoExists = true;
+            sendBtn.setVisibility(View.VISIBLE);
         }
     }
 

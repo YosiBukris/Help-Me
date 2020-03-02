@@ -99,8 +99,7 @@ public class WorkerMain extends AppCompatActivity {
                 .child(StartActivity.mFireBaseAuth.getCurrentUser().getUid()).setValue(e).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful())
-                                Toast.makeText(getApplicationContext(), "Token has saved", Toast.LENGTH_LONG).show();
+                            if (task.isSuccessful()){}
                             else
                                 Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
@@ -193,6 +192,7 @@ public class WorkerMain extends AppCompatActivity {
             public void onClick(View v) {
                 Toast.makeText(getApplicationContext(), "A message was sent to the customer", Toast.LENGTH_LONG).show();
                 removeCallFromDatabase(call);
+                sendAlertToCustomer();
                 calls.remove(call);
                 myDialog.cancel();
             }
@@ -209,6 +209,10 @@ public class WorkerMain extends AppCompatActivity {
 
     }
 
+    private void sendAlertToCustomer() {
+        //to implement notification
+    }
+
     private void getImageFromStorage(ImageView image) {
         Picasso.with(WorkerMain.this).load(call.pic).into(image);
     }
@@ -216,5 +220,10 @@ public class WorkerMain extends AppCompatActivity {
     private void removeCallFromDatabase(Call c){
        callsRef.child(call.customerNumber).setValue(null);
        StartActivity.storageRef.child(workPlace.getName()).child(WORK_PLACE_CALLS).child(call.customerNumber).delete();
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 }

@@ -23,6 +23,9 @@ public class Call {
         this.done = true;
     }
 
+    public String getCustomerNumber() {
+        return customerNumber;
+    }
 }
 
 

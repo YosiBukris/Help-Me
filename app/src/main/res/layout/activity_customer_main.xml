@@ -9,7 +9,7 @@
     <TextView
         android:id="@+id/TitleCusLog"
         android:layout_width="match_parent"
-        android:layout_height="96dp"
+        android:layout_height="80dp"
         android:background="#E1E3EC"
         android:text="HelpMe"
         android:textAlignment="center"
@@ -37,8 +37,11 @@
 
         <Button
             android:id="@+id/cameraBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:background="@drawable/button_round"
+            android:layout_above="@id/sendBTN"
+            android:layout_marginBottom="10dp"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
             android:layout_centerInParent="true"
             android:text="Take a photo"/>
 
@@ -50,17 +53,16 @@
             android:layout_above="@id/sendBTN"
             android:layout_below="@id/name_textView"/>
 
-        <TextView
+        <Button
             android:id="@+id/sendBTN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Send photo"
-            android:textSize="30dp"
-            android:layout_centerHorizontal="true"
+            android:background="@drawable/button_round"
             android:layout_centerInParent="true"
             android:layout_alignParentBottom="true"
-            android:textStyle="bold|normal"
-            android:textColor="@android:color/holo_blue_dark"
+            android:clickable="true"
+            android:text="Send photo"
+            android:layout_marginBottom="10dp"
+            android:layout_width="120dp"
+            android:layout_height="50dp"/>
             />
 
 
