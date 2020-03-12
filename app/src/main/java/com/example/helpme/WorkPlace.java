@@ -7,6 +7,7 @@ import android.graphics.Picture;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -34,7 +35,8 @@ public class WorkPlace implements Comparable {
     private int numOfWorkers = 0;
     private ArrayList<Call> uploads;
     private Employee manager;
-    private Map<String,Employee> employees;
+    private Map<String, Employee> employees;
+
 
     public WorkPlace(String name, String code, int maxWorkers, Employee manager, ArrayList<Call> uploads) {
         this.code = code;
@@ -44,24 +46,23 @@ public class WorkPlace implements Comparable {
         employees = new HashMap<>();
     }
 
-    public WorkPlace() {
+    public WorkPlace(){}
 
-    }
 
-    public void addWorker(Employee e){
-        if(employees==null)
+    public void addWorker(Employee e) {
+        if (employees == null)
             employees = new HashMap<>();
-        employees.put(e.getId(),e);
+        employees.put(e.getId(), e);
         numOfWorkers++;
     }
 
-    public void removeWorker(Employee e){
+    public void removeWorker(Employee e) {
         employees.remove(e.getId());
         numOfWorkers--;
     }
 
-    public void addCall(final String customerPhone, ImageView pic, Uri imageUri){
-        final StorageReference filePath=StartActivity.storageRef.child(this.name).child(WORK_PLACE_CALLS).child("image"+ imageUri.getLastPathSegment());
+    public void addCall(final String customerPhone, ImageView pic, Uri imageUri, final String token, final String Uid) {
+        final StorageReference filePath = StartActivity.storageRef.child(this.name).child(WORK_PLACE_CALLS).child(customerPhone);
         filePath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -69,32 +70,21 @@ public class WorkPlace implements Comparable {
                     @Override
                     public void onSuccess(Uri uri) {
                         Log.d("hodd", "onSuccess: " + uri);
-                        StartActivity.mDatabaseReferencePlaces.child(name).child(UPLOADS).child(customerPhone).setValue(new Call(customerPhone,String.valueOf(uri)))
+                        StartActivity.mDatabaseReferencePlaces.child(name).child(UPLOADS).child(customerPhone).setValue(new Call(customerPhone, String.valueOf(uri), token, Uid))
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
-
                                         Log.d("Wrokplace", "onComplete: isSeccessful");
+                                        CustomerMain.pbSendBtn.setVisibility(View.INVISIBLE);
                                     }
                                 });
                     }
                 });
             }
         });
-
-
-//        StartActivity.mDatabaseReferencePlaces.child(this.name).child(UPLOADS).setValue(mImap);
-        if(employees==null){
-            return;
-        }
-        for(Employee e : employees.values()){
-            sendAlert(e);
-        }
     }
 
-    private void sendAlert(Employee e) {
-        //send alert all over the employee in the same store
-    }
+
 
     public String getName() {
         return name;

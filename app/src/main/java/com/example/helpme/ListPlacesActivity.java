@@ -18,6 +18,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,32 +31,46 @@ import java.util.TreeMap;
 public class ListPlacesActivity extends AppCompatActivity {
     private final String CUSTOMER_NAME="customerName";
     private final String NAME_OF_PLACE="nameOfPlace";
-    private final String PHONE_NUM="PhoneNum";
     private ListView listView;
     private String nameOfChosePlace;
     private boolean isChoosePlace=false;
     private TextView nameEditText;
     private Button confirmBtn;
-    private String completeNum;
-
-    private Map<Integer,String> placeMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_places);
-        initViews();
+        init();
         createListViews();
         choosePlace();
         connectAndStartListPlacesActivity();
     }
 
-    private void initViews(){
+    private void init(){
         confirmBtn=(Button) findViewById(R.id.loginConfirmBtn);
         nameEditText=(EditText)findViewById(R.id.customerEditName);
         listView=(ListView)findViewById(R.id.listView);
-        //completeNum = getIntent().getStringExtra(PHONE_NUM);
-        createListViews();
+    }
+
+    //choose place
+    private void choosePlace() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                clearBackgroundItems();
+                nameOfChosePlace = listView.getItemAtPosition(position).toString();
+                view.setBackgroundColor(Color.YELLOW);
+                isChoosePlace=true;
+            }
+        });
+    }
+
+    //clear all places that sign before
+    private void clearBackgroundItems(){
+        for(View v:listView.getTouchables()){
+            v.setBackgroundColor(00000000);
+        }
     }
 
     private void createListViews() {
@@ -64,37 +81,19 @@ public class ListPlacesActivity extends AppCompatActivity {
         }
     }
 
-    //choose place
-    private void choosePlace() {
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                clearBackgroundItems();
-                nameOfChosePlace = listView.getItemAtPosition(position).toString();
-                view.setBackgroundColor(Color.CYAN);
-                isChoosePlace=true;
-            }
-        });
-    }
-
-    //clear all places that sign before
-    private void clearBackgroundItems(){
-        for(View v:listView.getTouchables()){
-            v.setBackgroundColor(Color.WHITE);
-        }
-    }
-
     private void connectAndStartListPlacesActivity(){
             confirmBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(isChoosePlace) {
-                    Intent intent = new Intent(ListPlacesActivity.this, CustomerMain.class);
-                    intent.putExtra(CUSTOMER_NAME, nameEditText.getText().toString());
-                    intent.putExtra(NAME_OF_PLACE, nameOfChosePlace);
-                    //intent.putExtra(PHONE_NUM,completeNum);
-                    startActivity(intent);
-                    }else{
+                    if(isChoosePlace && !nameEditText.getText().toString().equals("")) {
+                        Intent intent = new Intent(ListPlacesActivity.this, CustomerMain.class);
+                        intent.putExtra(CUSTOMER_NAME, nameEditText.getText().toString());
+                        intent.putExtra(NAME_OF_PLACE, nameOfChosePlace);
+                        startActivity(intent);
+                    }else if(nameEditText.getText().toString().equals("")){
+                        nameEditText.setError("Help us to find you, please enter your name");
+                        nameEditText.requestFocus();
+                    }else if(isChoosePlace==false){
                         Toast.makeText(ListPlacesActivity.this,
                                 "You must choose one place", Toast.LENGTH_SHORT).show();
                     }
@@ -104,6 +103,10 @@ public class ListPlacesActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        finish();
+        super.onBackPressed();
+        StartActivity.mFireBaseAuth.signOut();
+//        Intent intent = new Intent(ListPlacesActivity.this, StartActivity.class);
+//        startActivity(intent);
+//        finish();
     }
 }

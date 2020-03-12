@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -43,11 +44,17 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
+import com.squareup.okhttp.ResponseBody;
 import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class WorkerMain extends AppCompatActivity {
     private final String WORK_PLACE="WorkPlaceName";
@@ -56,6 +63,10 @@ public class WorkerMain extends AppCompatActivity {
     private final String UPLOADS = "Uploads";
     private final String CUSTOMER_NUMBER="customerNumber";
     private final String PIC="pic";
+    private final String TOKEN="token";
+    public final String UID="callUid";
+    public final String TITLE = "On My Way";
+    public final String BODY = "The employee comes to you in a few moments";
     private final String HI="Hi ";
     private final String STORE="Store: ";
     private TextView name;
@@ -70,7 +81,8 @@ public class WorkerMain extends AppCompatActivity {
     private Button confirm;
     private Button cancel;
     private ImageView imagePopup;
-
+    private int counter=0;
+    private ArrayAdapter arrayAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,18 +118,9 @@ public class WorkerMain extends AppCompatActivity {
                     });
     }
 
-    @Override
-    protected void onStart(){
-        super.onStart();
-        if(StartActivity.mFireBaseAuth.getCurrentUser() == null) {
-            Intent intent = new Intent(this, WorkerLogIn.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        }
-    }
+
 
     private void initView() {
-//        image=findViewById(R.id.location_photo);
         name=findViewById(R.id.worker_name);
         place=findViewById(R.id.place_name);
         callsList=findViewById(R.id.workMainlistView);
@@ -131,7 +134,7 @@ public class WorkerMain extends AppCompatActivity {
         }
         if(workPlace!=null)
             place.setText(STORE + workPlace.getName());
-        calls = new ArrayList<>();
+
     }
 
     private void createListView(){
@@ -140,18 +143,21 @@ public class WorkerMain extends AppCompatActivity {
             callsRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    calls = new ArrayList<>();
                     for (DataSnapshot post : dataSnapshot.getChildren()) {
                         String retrieveCellphoneNumber = dataSnapshot.child(post.getKey()).child(CUSTOMER_NUMBER).getValue().toString();
                         String retrievePic = dataSnapshot.child(post.getKey()).child(PIC).getValue().toString();
+                        String retrieveToken = dataSnapshot.child(post.getKey()).child(TOKEN).getValue().toString();
+                        String retrieveUid = dataSnapshot.child(post.getKey()).child(UID).getValue().toString();
                         if (!dataSnapshot.child(retrieveCellphoneNumber).exists()) {
-                            calls.add(new Call(retrieveCellphoneNumber, retrievePic));
+                            calls.add(new Call(retrieveCellphoneNumber, retrievePic,retrieveToken,retrieveUid));
                         } else {
-                            calls.remove(new Call(retrieveCellphoneNumber, retrievePic));
-                            calls.add(new Call(retrieveCellphoneNumber, retrievePic));
+                            calls.remove(new Call(retrieveCellphoneNumber, retrievePic,retrieveToken,retrieveUid));
+                            calls.add(new Call(retrieveCellphoneNumber, retrievePic,retrieveToken,retrieveUid));
                         }
                     }
                     //create adapter
-                    ArrayAdapter arrayAdapter =
+                     arrayAdapter =
                             new ArrayAdapter(WorkerMain.this, android.R.layout.simple_list_item_1, calls);
                     //add to listView
                     callsList.setAdapter(arrayAdapter);
@@ -160,6 +166,7 @@ public class WorkerMain extends AppCompatActivity {
                 public void onCancelled(@NonNull DatabaseError databaseError) {
                 }
             });
+
         }
     }
 
@@ -190,10 +197,12 @@ public class WorkerMain extends AppCompatActivity {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "A message was sent to the customer", Toast.LENGTH_LONG).show();
-                removeCallFromDatabase(call);
-                sendAlertToCustomer();
-                calls.remove(call);
+                Toast.makeText(getApplicationContext(), R.string.messageToCustomer, Toast.LENGTH_LONG).show();
+
+                sendAlertToCustomer(TITLE,BODY);
+                removeCallFromDatabaseAndStorage(call);
+
+                calls.remove(call);//remove from list maybe we dont need this
                 myDialog.cancel();
             }
         });
@@ -209,21 +218,47 @@ public class WorkerMain extends AppCompatActivity {
 
     }
 
-    private void sendAlertToCustomer() {
-        //to implement notification
+    private void sendAlertToCustomer(String title , String body) {
+
+        NotificationHelper.displayNotification(getApplicationContext(),title,body);
+            String token = call.getToken();
+            Retrofit retrofit = new Retrofit.Builder().baseUrl("https://fcm.googleapis.com/")
+                    .addConverterFactory(GsonConverterFactory.create()).build();
+            Api api = retrofit.create(Api.class);
+            api.sendNotification(new Sender(new Data(call.getCallUid(),
+                    R.drawable.helpmeicon ,body,title, StartActivity.mFireBaseAuth.getCurrentUser().getUid()),token)).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(retrofit2.Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if(response.code()==200)
+                        Log.d("ifsuccess", "onResponse: success");
+                }
+
+                @Override
+                public void onFailure(retrofit2.Call<ResponseBody> call, Throwable t) {
+
+                }
+            });
+
     }
 
     private void getImageFromStorage(ImageView image) {
-        Picasso.with(WorkerMain.this).load(call.pic).into(image);
+        Picasso.with(WorkerMain.this).load(call.getPic()).into(image);
     }
 
-    private void removeCallFromDatabase(Call c){
-       callsRef.child(call.customerNumber).setValue(null);
-       StartActivity.storageRef.child(workPlace.getName()).child(WORK_PLACE_CALLS).child(call.customerNumber).delete();
+    private void removeCallFromDatabaseAndStorage(Call c){
+
+       callsRef.child(call.getCustomerNumber()).removeValue();
+       StartActivity.storageRef.child(workPlace.getName()).child(WORK_PLACE_CALLS).child(call.getCustomerNumber()).delete();
+
     }
+
 
     @Override
     public void onBackPressed() {
-        finish();
+        counter++;
+        Toast.makeText(this, R.string.logOutMessage, Toast.LENGTH_SHORT).show();
+        if(counter==2){
+            super.onBackPressed();
+        }
     }
 }

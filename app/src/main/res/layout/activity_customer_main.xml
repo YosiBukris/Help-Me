@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/helpmeicon"
     tools:context=".CustomerMain">
 
     <TextView
@@ -35,23 +36,31 @@
         android:layout_centerInParent="true"/>
 
 
-        <Button
-            android:id="@+id/cameraBTN"
-            android:background="@drawable/button_round"
-            android:layout_above="@id/sendBTN"
-            android:layout_marginBottom="10dp"
-            android:layout_width="120dp"
-            android:layout_height="50dp"
-            android:layout_centerInParent="true"
-            android:text="Take a photo"/>
+
 
         <ImageView
             android:id="@+id/photo_image_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="30dp"
+            android:layout_margin="30dp"
             android:layout_above="@id/sendBTN"
             android:layout_below="@id/name_textView"/>
+
+        <ImageView
+            android:id="@+id/cameraBTN"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/camera"
+            android:layout_centerInParent="true"/>
+
+        <ImageView
+            android:id="@+id/camera_again"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/camera_again"
+            android:layout_margin="5dp"
+            android:layout_below="@id/TitleCusLog"/>
+
 
         <Button
             android:id="@+id/sendBTN"
@@ -65,6 +74,13 @@
             android:layout_height="50dp"/>
             />
 
+        <ProgressBar
+            android:id="@+id/pb_sendBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="10dp"/>
 
 
 

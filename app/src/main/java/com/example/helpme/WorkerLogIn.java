@@ -6,7 +6,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -23,6 +25,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+
 public class WorkerLogIn extends AppCompatActivity {
     private final String WORK_PLACE="WorkPlaceName";
     private final String EMPLOYEE="nameOfEmployee";
@@ -32,7 +36,6 @@ public class WorkerLogIn extends AppCompatActivity {
     private Button connectMan;
     private String empMail;
     private String placeID;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,8 +57,8 @@ public class WorkerLogIn extends AppCompatActivity {
             public void onClick(View view) {
                 empMail = workerMail.getText().toString();
                 placeID = placeCode.getText().toString();
-                if (empMail != null && placeID != null) {
-                    StartActivity.mFireBaseAuth.signInWithEmailAndPassword(empMail, placeID)
+                if (!empMail.equals("") && !placeID.equals("")) {
+                    StartActivity.mFireBaseAuth.signInWithEmailAndPassword(empMail, placeID+empMail)
                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -63,12 +66,17 @@ public class WorkerLogIn extends AppCompatActivity {
                                         Intent intent = new Intent(WorkerLogIn.this, WorkerMain.class);
                                         intent.putExtra(WORK_PLACE, placeID);
                                         intent.putExtra(EMPLOYEE, empMail);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                         startActivity(intent);
                                     } else
                                         Toast.makeText(WorkerLogIn.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                                 }
                             });
+                } else if (empMail.equals("")) {
+                    workerMail.setError("Invalid email/code");
+                    workerMail.requestFocus();
+                }else if(placeID.equals("")){
+                    placeCode.setError("Invalid workplace code");
+                    placeCode.requestFocus();
                 }
             }
         });
@@ -78,7 +86,7 @@ public class WorkerLogIn extends AppCompatActivity {
             public void onClick(View v) {
                 empMail = workerMail.getText().toString();
                 placeID = placeCode.getText().toString();
-                if (empMail != null && placeID != null) {
+                if (!empMail.equals("") && !placeID.equals("")) {
                     for (WorkPlace p : StartActivity.places.getArrayList()) {
                         if (p.getCode().equals(placeID)) {
                             if (p.getManager() != null) {
@@ -93,6 +101,12 @@ public class WorkerLogIn extends AppCompatActivity {
                             }
                         }
                     }
+                } else if (empMail.equals("")) {
+                    workerMail.setError("Invalid email/code");
+                    workerMail.requestFocus();
+                }else if(placeID.equals("")){
+                    placeCode.setError("Invalid workplace code");
+                    placeCode.requestFocus();
                 }
             }
         });

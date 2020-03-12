@@ -31,6 +31,7 @@ public class ManagerPage extends AppCompatActivity {
         initView();
         addFreg.setPlace(place);
         addFreg.setThisMannagerPage(this);
+        StartActivity.mFireBaseAuth.signOut();
         initClicks();
     }
 

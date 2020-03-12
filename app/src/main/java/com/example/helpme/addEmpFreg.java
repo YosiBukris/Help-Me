@@ -1,6 +1,7 @@
 package com.example.helpme;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -20,8 +21,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -89,43 +93,42 @@ public class addEmpFreg extends Fragment {
         addEmpBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (checkValidation()) {
-                    name = nameTXT.getText().toString();
-                    mail = MAILTXT.getText().toString();
-                    phone = phoneTXT.getText().toString();
-                    if(mail.isEmpty()){
-                        MAILTXT.setError("Email required");
-                        MAILTXT.requestFocus();
-                        return;
-                    }
-                    if(name.isEmpty()){
-                        nameTXT.setError("Name required");
-                        nameTXT.requestFocus();
-                        return;
-                    }
-                    newEmp = new Employee(name, mail, phone);
-                    if (newEmp != null) {
-                        place.addWorker(new Employee(name,mail,phone));
-                        //StartActivity.mDatabaseReferencePlaces.child(place.getName()).child("employees").child(phone).setValue(newEmp);
-                        StartActivity.mDatabaseReferencePlaces.child(place.getName()).child("numOfWorkers").setValue(place.getNumOfWorkers() + 1);
-                        StartActivity.mFireBaseAuth.createUserWithEmailAndPassword(mail,place.getCode()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful())
-                                    thisMannagerPage.successAdd();
-                                else {
-                                    if (task.getException() instanceof FirebaseAuthUserCollisionException) {
-                                        Toast.makeText(thisMannagerPage, "User exist", Toast.LENGTH_LONG).show();
-                                    } else
-                                        Toast.makeText(thisMannagerPage, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                if (place != null) {
+                    if (checkValidation()) {
+                        name = nameTXT.getText().toString();
+                        mail = MAILTXT.getText().toString();
+                        phone = phoneTXT.getText().toString();
+                        if (mail.isEmpty()) {
+                            MAILTXT.setError("Email required");
+                            MAILTXT.requestFocus();
+                            return;
+                        }
+                        if (name.isEmpty()) {
+                            nameTXT.setError("Name required");
+                            nameTXT.requestFocus();
+                            return;
+                        }
+                        newEmp = new Employee(name, mail, phone);
+                        if (newEmp != null) {
+                            place.addWorker(new Employee(name, mail, phone));
+                            StartActivity.mFireBaseAuth.createUserWithEmailAndPassword(mail, place.getCode()+mail).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isSuccessful())
+                                        thisMannagerPage.successAdd();
+                                    else {
+                                        if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                                            Toast.makeText(thisMannagerPage, "User exist", Toast.LENGTH_LONG).show();
+                                        } else
+                                            Toast.makeText(thisMannagerPage, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                    }
                                 }
-                            }
-                        });
-
+                            });
+                        }
+                        nameTXT.setText("");
+                        MAILTXT.setText("");
+                        phoneTXT.setText("");
                     }
-                    nameTXT.setText("");
-                    MAILTXT.setText("");
-                    phoneTXT.setText("");
                 }
             }
         });
@@ -138,9 +141,42 @@ public class addEmpFreg extends Fragment {
                     for (Employee e : place.getEmployees()) {
                         if (e != null) {
                             if (e.getId().equals(mail)) {
-                                //StartActivity.mDatabaseReferencePlaces.child(place.getName()).child("employees").child(phone).removeValue();
-                                StartActivity.mDatabaseReferencePlaces.child(place.getName()).child("numOfWorkers").setValue(place.getNumOfWorkers() - 1);
-                                thisMannagerPage.successDell();
+                                StartActivity.mFireBaseAuth.signInWithEmailAndPassword(mail, thisMannagerPage.place.getCode())
+                                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                                if (task.isSuccessful()) {
+                                                    final FirebaseUser user = StartActivity.mFireBaseAuth.getCurrentUser();
+                                                    final DatabaseReference dbUsers = FirebaseDatabase.getInstance().getReference("places").child(thisMannagerPage.place.getName()).child("employees");
+                                                    dbUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            if(dataSnapshot.exists()){
+                                                                for(DataSnapshot dsUser : dataSnapshot.getChildren()) {
+                                                                    Employee employee = dsUser.getValue(Employee.class);
+                                                                    if(employee.getId().equals(user.getEmail()))
+                                                                        dsUser.getRef().removeValue();
+                                                                }
+                                                            }
+                                                        }
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                        }
+                                                    });
+                                                    user.delete()
+                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if (task.isSuccessful()) {
+                                                                        thisMannagerPage.successDell();
+                                                                    }
+                                                                }
+                                                            });
+                                                } else
+                                                    Toast.makeText(thisMannagerPage, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                            }
+                                        });
                                 return;
                             }
                         }

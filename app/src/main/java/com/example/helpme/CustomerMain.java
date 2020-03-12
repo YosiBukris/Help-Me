@@ -1,27 +1,22 @@
 package com.example.helpme;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
 
 import android.Manifest;
-import android.app.Notification;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,14 +29,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.RemoteMessage;
 import com.squareup.okhttp.ResponseBody;
 
-import org.w3c.dom.Text;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,8 +40,6 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static androidx.constraintlayout.widget.Constraints.TAG;
-
 public class CustomerMain extends AppCompatActivity {
     private static final int PERMISSION_CODE=1000;
     private static final int IMAGE_CAPTURE_CODE=1001;
@@ -61,7 +48,9 @@ public class CustomerMain extends AppCompatActivity {
     private final String CUSTOMER_NAME="customerName";
     private final String NAME_OF_PLACE="nameOfPlace";
     private final String PHONE_NUM="PhoneNum";
-    private Button cameraBtn;
+    private ImageView cameraBtn;
+    private ImageView cameraAgain;
+    public static ProgressBar pbSendBtn;
     private Button sendBtn;
     private ImageView returnPhoto;
     private TextView name;
@@ -73,6 +62,7 @@ public class CustomerMain extends AppCompatActivity {
     private List<Employee> employeeList;
     private boolean photoExists=false;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,7 +71,32 @@ public class CustomerMain extends AppCompatActivity {
         getNameAndStoreFromCustomerMain();
         clickToTakeAPhoto();
         loadUsers();
-        sendAlertToWorker();
+        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+            @Override
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                if(task.isSuccessful()){
+                    String token = task.getResult().getToken();
+                    sendAlertToWorker(token);
+                }
+                else
+                {}
+            }
+        });
+
+    }
+
+    private void initViews(){
+        cameraBtn =(ImageView)findViewById(R.id.cameraBTN);
+        cameraAgain=(ImageView)findViewById(R.id.camera_again);
+        cameraAgain.setVisibility(View.INVISIBLE);
+        sendBtn   =(Button) findViewById(R.id.sendBTN);
+        sendBtn.setVisibility(View.INVISIBLE);
+        returnPhoto=(ImageView)findViewById(R.id.photo_image_view);
+        name=(TextView)findViewById(R.id.name_textView);
+        place=(TextView)findViewById(R.id.place_name_textView);
+        sendBtn.setVisibility(View.INVISIBLE);
+        pbSendBtn=findViewById(R.id.pb_sendBtn);
+        pbSendBtn.setVisibility(View.INVISIBLE);
     }
 
     private void loadUsers() {
@@ -106,14 +121,16 @@ public class CustomerMain extends AppCompatActivity {
         });
     }
 
-    private void initViews(){
-        cameraBtn =(Button)findViewById(R.id.cameraBTN);
-        sendBtn   =(Button) findViewById(R.id.sendBTN);
-        returnPhoto=(ImageView)findViewById(R.id.photo_image_view);
-        name=(TextView)findViewById(R.id.name_textView);
-        place=(TextView)findViewById(R.id.place_name_textView);
-        sendBtn.setVisibility(View.INVISIBLE);
+    private void openCameraAgain(){
+        cameraAgain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openCamera();
+            }
+        });
     }
+
+
 
     private void getNameAndStoreFromCustomerMain(){
         intentName=getIntent().getStringExtra(CUSTOMER_NAME);
@@ -142,6 +159,7 @@ public class CustomerMain extends AppCompatActivity {
                 else{
                     openCamera();
                 }
+
             }
         });
     }
@@ -170,14 +188,16 @@ public class CustomerMain extends AppCompatActivity {
         startActivityForResult(intent,IMAGE_CAPTURE_CODE);
     }
 
-    private void sendAlertToWorker() {
+    //from customer to worker
+    private void sendAlertToWorker(final String token) {
         sendBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if(photoExists && employeeList!=null) {
-                        currentPlace.addCall(CustomerLogIn.completeNum,returnPhoto, imageUri);
+                        currentPlace.addCall(CustomerLogIn.completeNum,returnPhoto, imageUri,token,StartActivity.mFireBaseAuth.getCurrentUser().getUid());
                         String title = "New Call";
-                        String body = "New call in " + currentPlace.getName() + " from " + name;
+                        String body = "New call in " + currentPlace.getName() + " from " + getIntent().getExtras().get(CUSTOMER_NAME);
+                        NotificationHelper.displayNotification(getApplicationContext(),title,body);
                         for(Employee e : employeeList){
                             String token = e.getToken();
                             Retrofit retrofit = new Retrofit.Builder().baseUrl("https://fcm.googleapis.com/")
@@ -197,8 +217,8 @@ public class CustomerMain extends AppCompatActivity {
                                 }
                             });
                         }
-                        Toast.makeText(CustomerMain.this,
-                                "Your request has been sent", Toast.LENGTH_SHORT).show();
+                        sendBtn.setVisibility(View.INVISIBLE);
+                        pbSendBtn.setVisibility(View.VISIBLE);
                     }else{
                         Toast.makeText(CustomerMain.this,
                                 "You must take a photo", Toast.LENGTH_SHORT).show();
@@ -214,6 +234,9 @@ public class CustomerMain extends AppCompatActivity {
         if(resultCode ==RESULT_OK) {
             returnPhoto.setImageURI(imageUri);
             photoExists = true;
+            cameraAgain.setVisibility(View.VISIBLE);
+            cameraBtn.setVisibility(View.INVISIBLE);
+            openCameraAgain();
             sendBtn.setVisibility(View.VISIBLE);
         }
     }
@@ -221,5 +244,6 @@ public class CustomerMain extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        StartActivity.mFireBaseAuth.signOut();
     }
 }
