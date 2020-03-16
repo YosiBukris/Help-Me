@@ -20,8 +20,6 @@ public class ManagerPage extends AppCompatActivity {
     public WorkPlace place;
     private String intentName;
     private String intentPlace;
-    private Boolean showFreg = false;
-    private Boolean succesAdd = false;
     private addEmpFreg addFreg;
 
     @Override

@@ -37,7 +37,6 @@ public class StartActivity extends AppCompatActivity {
     public static DatabaseReference mDatabaseReferencePlaces;
     public static FirebaseStorage storage;
     public static StorageReference storageRef;
-    private boolean userExists = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

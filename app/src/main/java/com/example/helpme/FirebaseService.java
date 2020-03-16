@@ -16,7 +16,6 @@ import androidx.core.app.NotificationCompat;
 public class FirebaseService extends FirebaseMessagingService
 {
     private String TAG = "FirebaseService";
-
     public static final String NOTIFICATION_CHANNEL_ID = "nh-demo-channel-id";
     public static final String NOTIFICATION_CHANNEL_NAME = "Notification Hubs Demo Channel";
     public static final String NOTIFICATION_CHANNEL_DESCRIPTION = "Notification Hubs Demo Channel";

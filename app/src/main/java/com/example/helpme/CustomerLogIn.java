@@ -43,8 +43,8 @@ public class CustomerLogIn extends AppCompatActivity {
         logIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                pbCustomer.setVisibility(View.VISIBLE);
                 userExists();
-
             }
         });
     }
@@ -60,7 +60,6 @@ public class CustomerLogIn extends AppCompatActivity {
     }
 
     private void userExists() {
-        pbCustomer.setVisibility(View.VISIBLE);
         String mail=mailOfCustomer.getText().toString().trim();
         String cus_password=password.getText().toString();
         if(mail.isEmpty()){
