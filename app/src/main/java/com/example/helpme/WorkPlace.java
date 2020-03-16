@@ -61,8 +61,8 @@ public class WorkPlace implements Comparable {
         numOfWorkers--;
     }
 
-    public void addCall(final String customerPhone, ImageView pic, Uri imageUri, final String token, final String Uid) {
-        final StorageReference filePath = StartActivity.storageRef.child(this.name).child(WORK_PLACE_CALLS).child(customerPhone);
+    public void addCall(final String customerMail, ImageView pic, Uri imageUri, final String token, final String Uid) {
+        final StorageReference filePath = StartActivity.storageRef.child(this.name).child(WORK_PLACE_CALLS).child(token);
         filePath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -70,12 +70,13 @@ public class WorkPlace implements Comparable {
                     @Override
                     public void onSuccess(Uri uri) {
                         Log.d("hodd", "onSuccess: " + uri);
-                        StartActivity.mDatabaseReferencePlaces.child(name).child(UPLOADS).child(customerPhone).setValue(new Call(customerPhone, String.valueOf(uri), token, Uid))
+                        StartActivity.mDatabaseReferencePlaces.child(name).child(UPLOADS).child(token).setValue(new Call(customerMail, String.valueOf(uri), token, Uid))
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         Log.d("Wrokplace", "onComplete: isSeccessful");
                                         CustomerMain.pbSendBtn.setVisibility(View.INVISIBLE);
+                                        CustomerMain.cameraAgain.setVisibility(View.VISIBLE);
                                     }
                                 });
                     }

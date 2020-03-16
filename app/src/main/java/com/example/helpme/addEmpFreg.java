@@ -1,14 +1,9 @@
 package com.example.helpme;
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -26,21 +20,20 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
-
 public class addEmpFreg extends Fragment {
+    public final String PLACES="places";
+    public final String EMPLOYEES="employees";
     private final String DELETE = "delete";
     private final String ADD = "add";
     private String name;
     private String mail;
     private String phone;
     private TextView title;
-    private EditText nameTXT;
-    private EditText MAILTXT;
-    private EditText phoneTXT;
+    private EditText nameEditText;
+    private EditText mailEditText;
+    private EditText phoneEditText;
     private Button addEmpBTN;
     private Button delEmpBTN;
     private Button delClick;
@@ -48,16 +41,16 @@ public class addEmpFreg extends Fragment {
     private Employee newEmp;
     private WorkPlace place;
     private String action;
-    private ManagerPage thisMannagerPage;
+    private ManagerPage thisManagerPage;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_add_emp_freg, container, false);
         title = v.findViewById(R.id.TitleFregLog);
-        nameTXT = v.findViewById(R.id.nameNewEmp);
-        MAILTXT = v.findViewById(R.id.emailNewEmp);
-        phoneTXT = v.findViewById(R.id.phoneNewEmp);
+        nameEditText = v.findViewById(R.id.nameNewEmp);
+        mailEditText = v.findViewById(R.id.emailNewEmp);
+        phoneEditText = v.findViewById(R.id.phoneNewEmp);
         addEmpBTN = v.findViewById(R.id.commitAddEmp);
         delEmpBTN = v.findViewById(R.id.commitDelEmp);
         addClick = v.findViewById(R.id.AddBTNFreg);
@@ -68,9 +61,9 @@ public class addEmpFreg extends Fragment {
     }
 
     private void initViews() {
-        nameTXT.setVisibility(View.INVISIBLE);
-        MAILTXT.setVisibility((View.INVISIBLE));
-        phoneTXT.setVisibility(View.INVISIBLE);
+        nameEditText.setVisibility(View.INVISIBLE);
+        mailEditText.setVisibility((View.INVISIBLE));
+        phoneEditText.setVisibility(View.INVISIBLE);
         addEmpBTN.setVisibility(View.INVISIBLE);
         delEmpBTN.setVisibility(View.INVISIBLE);
     }
@@ -95,39 +88,40 @@ public class addEmpFreg extends Fragment {
             public void onClick(View v) {
                 if (place != null) {
                     if (checkValidation()) {
-                        name = nameTXT.getText().toString();
-                        mail = MAILTXT.getText().toString();
-                        phone = phoneTXT.getText().toString();
+                        name = nameEditText.getText().toString();
+                        mail = mailEditText.getText().toString();
+                        phone = phoneEditText.getText().toString();
                         if (mail.isEmpty()) {
-                            MAILTXT.setError("Email required");
-                            MAILTXT.requestFocus();
+                            mailEditText.setError("Email required");
+                            mailEditText.requestFocus();
                             return;
                         }
                         if (name.isEmpty()) {
-                            nameTXT.setError("Name required");
-                            nameTXT.requestFocus();
+                            nameEditText.setError("Name required");
+                            nameEditText.requestFocus();
                             return;
                         }
                         newEmp = new Employee(name, mail, phone);
                         if (newEmp != null) {
                             place.addWorker(new Employee(name, mail, phone));
-                            StartActivity.mFireBaseAuth.createUserWithEmailAndPassword(mail, place.getCode()+mail).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            StartActivity.mFireBaseAuth.createUserWithEmailAndPassword(mail, place.getCode())
+                                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
-                                    if (task.isSuccessful())
-                                        thisMannagerPage.successAdd();
-                                    else {
+                                    if (task.isSuccessful()) {
+                                        thisManagerPage.successAdd();
+                                    }else {
                                         if (task.getException() instanceof FirebaseAuthUserCollisionException) {
-                                            Toast.makeText(thisMannagerPage, "User exist", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(thisManagerPage, "User exist", Toast.LENGTH_LONG).show();
                                         } else
-                                            Toast.makeText(thisMannagerPage, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                            Toast.makeText(thisManagerPage, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                                     }
                                 }
                             });
                         }
-                        nameTXT.setText("");
-                        MAILTXT.setText("");
-                        phoneTXT.setText("");
+                        nameEditText.setText("");
+                        mailEditText.setText("");
+                        phoneEditText.setText("");
                     }
                 }
             }
@@ -135,19 +129,24 @@ public class addEmpFreg extends Fragment {
         delEmpBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mail = MAILTXT.getText().toString();
-                phone = phoneTXT.getText().toString();
+                mail = mailEditText.getText().toString();
+                if (mail.isEmpty()) {
+                    mailEditText.setError("Email required");
+                    mailEditText.requestFocus();
+                    return;
+                }
                 if (place.getEmployees() != null) {
                     for (Employee e : place.getEmployees()) {
                         if (e != null) {
                             if (e.getId().equals(mail)) {
-                                StartActivity.mFireBaseAuth.signInWithEmailAndPassword(mail, thisMannagerPage.place.getCode())
+                                StartActivity.mFireBaseAuth.signInWithEmailAndPassword(mail, thisManagerPage.place.getCode())
                                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                             @Override
                                             public void onComplete(@NonNull Task<AuthResult> task) {
                                                 if (task.isSuccessful()) {
                                                     final FirebaseUser user = StartActivity.mFireBaseAuth.getCurrentUser();
-                                                    final DatabaseReference dbUsers = FirebaseDatabase.getInstance().getReference("places").child(thisMannagerPage.place.getName()).child("employees");
+                                                    final DatabaseReference dbUsers = FirebaseDatabase.getInstance()
+                                                            .getReference(PLACES).child(thisManagerPage.place.getName()).child(EMPLOYEES);
                                                     dbUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -169,64 +168,64 @@ public class addEmpFreg extends Fragment {
                                                                 @Override
                                                                 public void onComplete(@NonNull Task<Void> task) {
                                                                     if (task.isSuccessful()) {
-                                                                        thisMannagerPage.successDell();
+                                                                        thisManagerPage.successDell();
                                                                     }
                                                                 }
                                                             });
                                                 } else
-                                                    Toast.makeText(thisMannagerPage, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                                    Toast.makeText(thisManagerPage, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                                             }
                                         });
+                                mailEditText.setText("");
                                 return;
                             }
+
                         }
                     }
+                    thisManagerPage.faileDell();
                 }
-                thisMannagerPage.faileDell();
+                thisManagerPage.listOfEmployeesIsEmpty();
             }
         });
     }
 
     private void checkClick(){
         if (this.action.equals(ADD)){
-            nameTXT.setVisibility(View.VISIBLE);
-            MAILTXT.setVisibility((View.VISIBLE));
-            phoneTXT.setVisibility(View.VISIBLE);
+            nameEditText.setVisibility(View.VISIBLE);
+            mailEditText.setVisibility((View.VISIBLE));
+            phoneEditText.setVisibility(View.VISIBLE);
             addEmpBTN.setVisibility(View.VISIBLE);
             delEmpBTN.setVisibility(View.INVISIBLE);
-            nameTXT.setText("");
-            MAILTXT.setText("");
-            phoneTXT.setText("");
+            nameEditText.setText("");
+            mailEditText.setText("");
+            phoneEditText.setText("");
             title.setText("Add Employee");
         }
         if(this.action.equals(DELETE)){
-            nameTXT.setVisibility(View.INVISIBLE);
-            MAILTXT.setVisibility((View.VISIBLE));
-            phoneTXT.setVisibility(View.VISIBLE);
+            nameEditText.setVisibility(View.INVISIBLE);
+            mailEditText.setVisibility((View.VISIBLE));
+            phoneEditText.setVisibility(View.INVISIBLE);
             addEmpBTN.setVisibility(View.INVISIBLE);
             delEmpBTN.setVisibility(View.VISIBLE);
-            nameTXT.setText("");
-            MAILTXT.setText("");
-            phoneTXT.setText("");
+            nameEditText.setText("");
+            mailEditText.setText("");
+            phoneEditText.setText("");
             title.setText("Delete Employee");
         }
     }
 
     private boolean checkValidation() {
-        if (phoneTXT.getText().toString().length() < 10){
-            thisMannagerPage.failedAdd();
+        if (phoneEditText.getText().toString().length() < 10){
+            thisManagerPage.failedAdd();
             return false;
         }
         if(place.getEmployees()!=null) {
             for (Employee e : this.place.getEmployees()) {
-                if (e.getId().equals(MAILTXT.getText().toString())) {
-                    thisMannagerPage.failedAddId();
+                if (e.getId().equals(mailEditText.getText().toString())) {
+                    thisManagerPage.failedAddId();
                     return false;
                 }
-                if (e.getPhone().equals("+972" + phoneTXT.getText().toString().substring(1))) {
-                    thisMannagerPage.failedAddPhone();
-                    return false;
-                }
+
             }
         }
         return true;
@@ -240,8 +239,8 @@ public class addEmpFreg extends Fragment {
         return newEmp;
     }
 
-    public void setThisMannagerPage(ManagerPage thisPage) {
-        this.thisMannagerPage = thisPage;
+    public void setThisManagerPage(ManagerPage thisPage) {
+        this.thisManagerPage = thisPage;
     }
 
 }

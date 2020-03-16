@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -49,7 +50,7 @@ public class CustomerMain extends AppCompatActivity {
     private final String NAME_OF_PLACE="nameOfPlace";
     private final String PHONE_NUM="PhoneNum";
     private ImageView cameraBtn;
-    private ImageView cameraAgain;
+    public static ImageView cameraAgain;
     public static ProgressBar pbSendBtn;
     private Button sendBtn;
     private ImageView returnPhoto;
@@ -71,17 +72,7 @@ public class CustomerMain extends AppCompatActivity {
         getNameAndStoreFromCustomerMain();
         clickToTakeAPhoto();
         loadUsers();
-        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-            @Override
-            public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                if(task.isSuccessful()){
-                    String token = task.getResult().getToken();
-                    sendAlertToWorker(token);
-                }
-                else
-                {}
-            }
-        });
+        createTokenAndSendAlertToWorker();
 
     }
 
@@ -99,6 +90,19 @@ public class CustomerMain extends AppCompatActivity {
         pbSendBtn.setVisibility(View.INVISIBLE);
     }
 
+    private void createTokenAndSendAlertToWorker(){
+        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+            @Override
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                if(task.isSuccessful()){
+                    String token = task.getResult().getToken();
+                    sendAlertToWorker(token);
+                }
+                else
+                {}
+            }
+        });
+    }
     private void loadUsers() {
         employeeList = new ArrayList<>();
         final DatabaseReference dbUsers = FirebaseDatabase.getInstance().getReference("places").child(currentPlace.getName()).child("employees");
@@ -112,6 +116,7 @@ public class CustomerMain extends AppCompatActivity {
                         employeeList.add(employee);
                     }
                 }
+                Log.d("checkEmployees", "onDataChange: " + employeeList);
             }
 
             @Override
@@ -135,7 +140,7 @@ public class CustomerMain extends AppCompatActivity {
     private void getNameAndStoreFromCustomerMain(){
         intentName=getIntent().getStringExtra(CUSTOMER_NAME);
         intentPlace=getIntent().getStringExtra(NAME_OF_PLACE);
-        for(WorkPlace p : StartActivity.places.getArrayList()){
+        for(WorkPlace p : ListPlacesActivity.places.getArrayList()){
             if(p.getName().equals(intentPlace))
                 currentPlace = p;
         }
@@ -193,29 +198,33 @@ public class CustomerMain extends AppCompatActivity {
         sendBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    cameraAgain.setVisibility(View.INVISIBLE);
                     if(photoExists && employeeList!=null) {
-                        currentPlace.addCall(CustomerLogIn.completeNum,returnPhoto, imageUri,token,StartActivity.mFireBaseAuth.getCurrentUser().getUid());
-                        String title = "New Call";
-                        String body = "New call in " + currentPlace.getName() + " from " + getIntent().getExtras().get(CUSTOMER_NAME);
-                        NotificationHelper.displayNotification(getApplicationContext(),title,body);
-                        for(Employee e : employeeList){
-                            String token = e.getToken();
-                            Retrofit retrofit = new Retrofit.Builder().baseUrl("https://fcm.googleapis.com/")
-                                    .addConverterFactory(GsonConverterFactory.create()).build();
-                            Api api = retrofit.create(Api.class);
-                            api.sendNotification(new Sender(new Data(StartActivity.mFireBaseAuth.getCurrentUser().getUid(),
-                                    R.drawable.helpmeicon ,body,title, e.getUid()),token)).enqueue(new Callback<ResponseBody>() {
-                                @Override
-                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                    if(response.code()==200)
-                                        Log.d("ifsuccess", "onResponse: success");
-                                }
+                        currentPlace.addCall(StartActivity.mFireBaseAuth.getCurrentUser().getEmail(),returnPhoto, imageUri,token,StartActivity.mFireBaseAuth.getCurrentUser().getUid());
+                        String title = "On My Way";
+                        String body = "The employee comes to you in a few moments";
+                        MyFirebaseMessagingService.setTitle(title);
+                        MyFirebaseMessagingService.setBody(body);
+                        for(Employee e : employeeList) {
+                                String token = e.getToken();
+                                Retrofit retrofit = new Retrofit.Builder().baseUrl("https://fcm.googleapis.com/")
+                                        .addConverterFactory(GsonConverterFactory.create()).build();
+                                Api api = retrofit.create(Api.class);
+                                api.sendNotification(new Sender(new Data(StartActivity.mFireBaseAuth.getCurrentUser().getUid(),
+                                        R.drawable.helpmeicon, body, title, e.getUid()), token)).enqueue(new Callback<ResponseBody>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                        if (response.code() == 200)
+                                            Log.d("ifsuccess", "onResponse: success");
 
-                                @Override
-                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                    }
 
-                                }
-                            });
+                                    @Override
+                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                                    }
+                                });
+
                         }
                         sendBtn.setVisibility(View.INVISIBLE);
                         pbSendBtn.setVisibility(View.VISIBLE);
@@ -244,6 +253,5 @@ public class CustomerMain extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        StartActivity.mFireBaseAuth.signOut();
     }
 }

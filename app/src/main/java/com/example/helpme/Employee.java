@@ -9,7 +9,6 @@ public class Employee implements Serializable {
     private String id;
     private String token;
     private String phone;
-    private boolean isConnected = false;
     private WorkPlace workPlace;
     private String Uid;
 
@@ -84,4 +83,5 @@ public class Employee implements Serializable {
     public void setId(String id) {
         this.id = id;
     }
+
 }

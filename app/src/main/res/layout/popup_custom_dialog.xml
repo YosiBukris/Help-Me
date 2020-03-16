@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/round">
     <ImageView
         android:id="@+id/image_popup"
         android:layout_width="match_parent"
         android:layout_margin="10dp"
-        android:layout_height="500dp"/>
+        android:layout_height="400dp"/>
     <Button
         android:id="@+id/confirm"
         android:text="Confirm"
@@ -14,7 +15,7 @@
         android:layout_below="@id/image_popup"
         android:layout_alignParentRight="true"
         android:layout_width="100dp"
-        android:layout_margin="40dp"
+        android:layout_margin="30dp"
         android:background="@drawable/button_confirm"
         android:layout_height="100dp"/>
     <Button
@@ -23,7 +24,7 @@
         android:layout_below="@id/image_popup"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="50dp"
-        android:layout_margin="40dp"
+        android:layout_margin="30dp"
         android:textStyle="bold"
         android:layout_width="100dp"
         android:background="@drawable/button_cancel"

@@ -30,8 +30,7 @@ public class ManagerPage extends AppCompatActivity {
         setContentView(R.layout.activity_manager_page);
         initView();
         addFreg.setPlace(place);
-        addFreg.setThisMannagerPage(this);
-        StartActivity.mFireBaseAuth.signOut();
+        addFreg.setThisManagerPage(this);
         initClicks();
     }
 
@@ -65,6 +64,11 @@ public class ManagerPage extends AppCompatActivity {
                 "Phone Number already exists", Toast.LENGTH_LONG).show();
     }
 
+    public void listOfEmployeesIsEmpty(){
+        Toast.makeText(getApplicationContext(),
+                "List of employees is empty", Toast.LENGTH_LONG).show();
+    }
+
     private void initClicks() {
         updateEmp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,7 +86,7 @@ public class ManagerPage extends AppCompatActivity {
         intentName=getIntent().getStringExtra(EMPLOYEE);
         intentPlace=getIntent().getStringExtra(WORK_PLACE);
         this.hello.setText("Hello " + intentName);
-        for(WorkPlace p : StartActivity.places.getArrayList()){
+        for(WorkPlace p : WorkerLogIn.places_worker.getArrayList()){
             if (p.getName().equals(intentPlace))
                 this.place = p;
         }

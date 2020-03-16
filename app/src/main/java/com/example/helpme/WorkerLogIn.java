@@ -36,29 +36,57 @@ public class WorkerLogIn extends AppCompatActivity {
     private Button connectMan;
     private String empMail;
     private String placeID;
+    private ProgressBar pbWorker;
+    public static PlaceFactory places_worker;
+    private ArrayList<WorkPlace> workPlaces;
+    private boolean isFindPlace =false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_worker_log_in);
         initViews();
+        initPlaces();
         logIn();
     }
 
     private void initViews() {
+        pbWorker = (ProgressBar) findViewById(R.id.workerLogIn_pb);
         workerMail= (EditText) findViewById(R.id.workerEditMail);
         placeCode = (EditText) findViewById(R.id.workplaceCode);
         connectEmp = (Button) findViewById(R.id.workerConnectBTN);
         connectMan = (Button) findViewById(R.id.managerConnectBTN);
+        places_worker = new PlaceFactory();
+        workPlaces = new ArrayList<>();
+        pbWorker.setVisibility(View.INVISIBLE);
+    }
+
+    private void initPlaces() {
+        FirebaseDatabase.getInstance().getReference("places").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for(DataSnapshot d : dataSnapshot.getChildren()){
+                    WorkPlace p = d.getValue(WorkPlace.class);
+                    workPlaces.add(p);
+                }
+                places_worker.setArrayList(workPlaces);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+            }
+        });
     }
 
     private void logIn() {
         connectEmp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                empMail = workerMail.getText().toString();
-                placeID = placeCode.getText().toString();
+                pbWorker.setVisibility(View.VISIBLE);
+                empMail = workerMail.getText().toString().trim();
+                placeID = placeCode.getText().toString().trim();
                 if (!empMail.equals("") && !placeID.equals("")) {
-                    StartActivity.mFireBaseAuth.signInWithEmailAndPassword(empMail, placeID+empMail)
+                    StartActivity.mFireBaseAuth.signInWithEmailAndPassword(empMail, placeID)
                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -72,12 +100,13 @@ public class WorkerLogIn extends AppCompatActivity {
                                 }
                             });
                 } else if (empMail.equals("")) {
-                    workerMail.setError("Invalid email/code");
+                    workerMail.setError("Invalid email");
                     workerMail.requestFocus();
                 }else if(placeID.equals("")){
                     placeCode.setError("Invalid workplace code");
                     placeCode.requestFocus();
                 }
+                pbWorker.setVisibility(View.INVISIBLE);
             }
         });
 
@@ -87,8 +116,9 @@ public class WorkerLogIn extends AppCompatActivity {
                 empMail = workerMail.getText().toString();
                 placeID = placeCode.getText().toString();
                 if (!empMail.equals("") && !placeID.equals("")) {
-                    for (WorkPlace p : StartActivity.places.getArrayList()) {
+                    for (WorkPlace p : places_worker.getArrayList()) {
                         if (p.getCode().equals(placeID)) {
+                            isFindPlace=true;
                             if (p.getManager() != null) {
                                 if (empMail.equals(p.getManager().getId())) {
                                     Toast.makeText(getApplicationContext(),
@@ -101,10 +131,16 @@ public class WorkerLogIn extends AppCompatActivity {
                             }
                         }
                     }
-                } else if (empMail.equals("")) {
-                    workerMail.setError("Invalid email/code");
+                    if(!isFindPlace){
+                        Toast.makeText(getApplicationContext(),
+                                "Email or workplace code is wrong", Toast.LENGTH_LONG).show();
+                    }
+                }
+                if (empMail.equals("")) {
+                    workerMail.setError("Invalid email");
                     workerMail.requestFocus();
-                }else if(placeID.equals("")){
+                }
+                if(placeID.equals("")){
                     placeCode.setError("Invalid workplace code");
                     placeCode.requestFocus();
                 }

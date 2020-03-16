@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".addEmpFreg">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
         android:id="@+id/TitleFregLog"
         android:layout_width="match_parent"
@@ -25,6 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_below="@id/TitleFregLog"
         android:orientation="vertical">
         <LinearLayout
             android:id="@+id/chooseLinearFreg"
@@ -37,7 +37,7 @@
             android:id="@+id/DelBTNFreg"
             android:layout_width="100dp"
             android:layout_height="30dp"
-            android:background="@drawable/button_round"
+            android:background="@drawable/button_cancel"
             android:layout_marginTop="15dp"
             android:layout_marginLeft="10dp"
             android:text="Delete " />
@@ -121,9 +121,10 @@
                 android:layout_width="250dp"
                 android:layout_height="30dp"
                 android:layout_centerInParent="true"
+                android:layout_below="@id/phoneNewEmp"
                 android:layout_gravity="center"
-                android:background="@drawable/button_round"
+                android:background="@drawable/button_cancel"
                 android:text="Delete Employee" />
         </LinearLayout>
     </LinearLayout>
-</FrameLayout>
+</RelativeLayout>

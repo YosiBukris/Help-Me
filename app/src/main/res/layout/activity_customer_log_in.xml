@@ -23,57 +23,79 @@
 
 
 
-    <EditText
-        android:id="@+id/phone_num_exists"
-        android:layout_width="250dp"
-        android:layout_height="66dp"
-        android:hint="Phone number"
-        android:background="@drawable/edit_round"
-        android:shadowColor="@android:color/white"
-        android:inputType="phone"
-        android:textAlignment="center"
-        android:layout_centerInParent="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="50dp"
-        android:layout_marginLeft="10dp"
-        android:textSize="30dp"
-        android:textStyle="bold"
-        android:layout_gravity="center"/>
+    <LinearLayout
+        android:id="@+id/LinearCusLog"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_below="@id/TitleCusLog"
+        android:layout_centerInParent="true">
 
-    <Spinner
-        android:id="@+id/spinner_exists"
-        android:layout_width="120dp"
-        android:layout_height="wrap_content"
-        android:layout_toLeftOf="@id/phone_num_exists"
-        android:layout_centerInParent="true"
-        />
+        <EditText
+            android:id="@+id/mail_of_customer"
+            android:layout_width="327dp"
+            android:layout_height="50dp"
+            android:layout_below="@id/TitleCusLog"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp"
+            android:hint="Enter Your Mail"
+            android:background="@drawable/edit_round"
+            android:inputType="textEmailAddress"
+            android:shadowColor="@android:color/white"
+            android:textAlignment="center"
+            android:textSize="20dp"
+            android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/login_btn"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:background="@drawable/button_round"
-        android:layout_marginTop="10dp"
-        android:layout_below="@id/phone_num_exists"
-        android:text="@string/login" />
 
-    <TextView
-        android:id="@+id/create_user"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_below="@id/login_btn"
-        android:text="Don't have a user yet?"
-        android:layout_marginTop="5dp"
-        android:textStyle="bold"
-        android:textColor="@color/colorPrimary"/>
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="327dp"
+            android:layout_height="50dp"
+            android:layout_below="@id/TitleCusLog"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp"
+            android:hint="Password"
+            android:background="@drawable/edit_round"
+            android:inputType="textPassword"
+            android:shadowColor="@android:color/white"
+            android:textAlignment="center"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+        <Button
+            android:id="@+id/login_btn"
+            android:layout_width="150dp"
+            android:background="@drawable/button_round"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:text="LOGIN" />
 
-    <ProgressBar
-        android:id="@+id/pb"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_centerInParent="true"
-        android:layout_alignParentRight="true"/>
+        <TextView
+            android:id="@+id/create_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Don't have a user yet?"
+            android:layout_marginTop="10dp"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:textColor="@color/colorPrimary"/>
+
+        <ProgressBar
+            android:id="@+id/customerLogIn_pb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="150dp"
+             />
+    </LinearLayout>
+
+
+
+
+
+
+
+
 
 </RelativeLayout>

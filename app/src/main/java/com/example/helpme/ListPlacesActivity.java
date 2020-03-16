@@ -35,22 +35,32 @@ public class ListPlacesActivity extends AppCompatActivity {
     private String nameOfChosePlace;
     private boolean isChoosePlace=false;
     private TextView nameEditText;
+    public static PlaceFactory places;
     private Button confirmBtn;
+    public static boolean userInTheSystem=false;
+    public interface DataStatus{
+        void DataIsLoaded(ArrayList<WorkPlace> places);
+        void DataIsInserted();
+        void DataIsUpdated();
+        void DataIsDeleted();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_places);
         init();
-        createListViews();
+        startInitPlaces();
         choosePlace();
         connectAndStartListPlacesActivity();
     }
 
     private void init(){
+        userInTheSystem=true;
         confirmBtn=(Button) findViewById(R.id.loginConfirmBtn);
         nameEditText=(EditText)findViewById(R.id.customerEditName);
         listView=(ListView)findViewById(R.id.listView);
+        places = new PlaceFactory();
     }
 
     //choose place
@@ -70,14 +80,6 @@ public class ListPlacesActivity extends AppCompatActivity {
     private void clearBackgroundItems(){
         for(View v:listView.getTouchables()){
             v.setBackgroundColor(00000000);
-        }
-    }
-
-    private void createListViews() {
-        if(StartActivity.places!=null) {
-            ArrayAdapter arrayAdapter =
-                    new ArrayAdapter(this, android.R.layout.simple_list_item_1, StartActivity.places.returnNames());
-            listView.setAdapter(arrayAdapter);
         }
     }
 
@@ -101,10 +103,54 @@ public class ListPlacesActivity extends AppCompatActivity {
             });
     }
 
+    private void startInitPlaces(){
+        initPlaces(new ListPlacesActivity.DataStatus() {
+            @Override
+            public void DataIsLoaded(ArrayList<WorkPlace> places) {
+                ListPlacesActivity.places.setArrayList(places);
+            }
+
+            @Override
+            public void DataIsInserted() {
+
+            }
+
+            @Override
+            public void DataIsUpdated() {
+
+            }
+
+            @Override
+            public void DataIsDeleted() {
+
+            }
+        });
+    }
+
+    private void initPlaces(final DataStatus dataStatus) {
+        StartActivity.mDatabaseReferencePlaces.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ArrayList<WorkPlace> temp = new ArrayList<>();
+                for(DataSnapshot d : dataSnapshot.getChildren()){
+                    WorkPlace p = d.getValue(WorkPlace.class);
+                    temp.add(p);
+                }
+                dataStatus.DataIsLoaded(temp);
+                ArrayAdapter arrayAdapter =
+                        new ArrayAdapter(ListPlacesActivity.this, android.R.layout.simple_list_item_1, ListPlacesActivity.places.returnNames());
+                listView.setAdapter(arrayAdapter);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+            }
+        });
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        StartActivity.mFireBaseAuth.signOut();
 //        Intent intent = new Intent(ListPlacesActivity.this, StartActivity.class);
 //        startActivity(intent);
 //        finish();

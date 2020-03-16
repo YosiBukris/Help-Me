@@ -34,9 +34,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
@@ -60,13 +62,16 @@ public class WorkerMain extends AppCompatActivity {
     private final String WORK_PLACE="WorkPlaceName";
     private final String WORK_PLACE_CALLS = "workPlaceCalls";
     private final String EMPLOYEE="nameOfEmployee";
+    private final String EMPLOYEES="employees";
+    private final String CALLS="calls";
     private final String UPLOADS = "Uploads";
-    private final String CUSTOMER_NUMBER="customerNumber";
+    private final String PLACES="places";
+    private final String CUSTOMER_MAIL="customerMail";
     private final String PIC="pic";
     private final String TOKEN="token";
     public final String UID="callUid";
-    public final String TITLE = "On My Way";
-    public final String BODY = "The employee comes to you in a few moments";
+    public final String TITLE = "New Call";
+    public final String BODY = "There is a new call in ";
     private final String HI="Hi ";
     private final String STORE="Store: ";
     private TextView name;
@@ -83,6 +88,7 @@ public class WorkerMain extends AppCompatActivity {
     private ImageView imagePopup;
     private int counter=0;
     private ArrayAdapter arrayAdapter;
+    private String placeID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,7 +96,7 @@ public class WorkerMain extends AppCompatActivity {
         initView();
         createListView();
         findCustomerPhoneClickOnList();//check what is clicked and get the cellphone number of customer
-        FirebaseMessaging.getInstance().subscribeToTopic("calls");
+        FirebaseMessaging.getInstance().subscribeToTopic(CALLS);
         FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
             @Override
             public void onComplete(@NonNull Task<InstanceIdResult> task) {
@@ -107,7 +113,7 @@ public class WorkerMain extends AppCompatActivity {
     private void saveToken(String token) {
         String mail = StartActivity.mFireBaseAuth.getCurrentUser().getEmail();
         Employee e = new Employee(mail,token);
-        StartActivity.mDatabaseReferencePlaces.child(workPlace.getName()).child("employees")
+        StartActivity.mDatabaseReferencePlaces.child(workPlace.getName()).child(EMPLOYEES)
                 .child(StartActivity.mFireBaseAuth.getCurrentUser().getUid()).setValue(e).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -125,10 +131,10 @@ public class WorkerMain extends AppCompatActivity {
         place=findViewById(R.id.place_name);
         callsList=findViewById(R.id.workMainlistView);
         name.setText(getIntent().getStringExtra(EMPLOYEE));
-        String placeID = getIntent().getStringExtra(WORK_PLACE);
+        placeID = getIntent().getStringExtra(WORK_PLACE);
 
         //found right place
-        for(WorkPlace p : StartActivity.places.getArrayList()){
+        for(WorkPlace p : WorkerLogIn.places_worker.getArrayList()){
             if (p.getCode().equals(placeID))
                 workPlace = p;
         }
@@ -145,15 +151,15 @@ public class WorkerMain extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     calls = new ArrayList<>();
                     for (DataSnapshot post : dataSnapshot.getChildren()) {
-                        String retrieveCellphoneNumber = dataSnapshot.child(post.getKey()).child(CUSTOMER_NUMBER).getValue().toString();
+                        String retrieveUid = dataSnapshot.child(post.getKey()).child(UID).getValue().toString();
+                        String retrieveCustomerMail = dataSnapshot.child(post.getKey()).child(CUSTOMER_MAIL).getValue().toString();
                         String retrievePic = dataSnapshot.child(post.getKey()).child(PIC).getValue().toString();
                         String retrieveToken = dataSnapshot.child(post.getKey()).child(TOKEN).getValue().toString();
-                        String retrieveUid = dataSnapshot.child(post.getKey()).child(UID).getValue().toString();
-                        if (!dataSnapshot.child(retrieveCellphoneNumber).exists()) {
-                            calls.add(new Call(retrieveCellphoneNumber, retrievePic,retrieveToken,retrieveUid));
+                        if (!dataSnapshot.child(retrieveToken).exists()) {
+                            calls.add(new Call(retrieveCustomerMail, retrievePic,retrieveToken,retrieveUid));
                         } else {
-                            calls.remove(new Call(retrieveCellphoneNumber, retrievePic,retrieveToken,retrieveUid));
-                            calls.add(new Call(retrieveCellphoneNumber, retrievePic,retrieveToken,retrieveUid));
+                            calls.remove(new Call(retrieveCustomerMail, retrievePic,retrieveToken,retrieveUid));
+                            calls.add(new Call(retrieveCustomerMail, retrievePic,retrieveToken,retrieveUid));
                         }
                     }
                     //create adapter
@@ -198,10 +204,8 @@ public class WorkerMain extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getApplicationContext(), R.string.messageToCustomer, Toast.LENGTH_LONG).show();
-
-                sendAlertToCustomer(TITLE,BODY);
+                sendAlertToCustomer(TITLE,BODY + workPlace.getName());
                 removeCallFromDatabaseAndStorage(call);
-
                 calls.remove(call);//remove from list maybe we dont need this
                 myDialog.cancel();
             }
@@ -219,8 +223,8 @@ public class WorkerMain extends AppCompatActivity {
     }
 
     private void sendAlertToCustomer(String title , String body) {
-
-        NotificationHelper.displayNotification(getApplicationContext(),title,body);
+            MyFirebaseMessagingService.setTitle("New Call");
+            MyFirebaseMessagingService.setBody("There is a new call in " + workPlace.getName());
             String token = call.getToken();
             Retrofit retrofit = new Retrofit.Builder().baseUrl("https://fcm.googleapis.com/")
                     .addConverterFactory(GsonConverterFactory.create()).build();
@@ -246,10 +250,32 @@ public class WorkerMain extends AppCompatActivity {
     }
 
     private void removeCallFromDatabaseAndStorage(Call c){
+       callsRef.child(call.getToken()).removeValue();
+       StartActivity.storageRef.child(workPlace.getName()).child(WORK_PLACE_CALLS).child(call.getToken()).delete();
 
-       callsRef.child(call.getCustomerNumber()).removeValue();
-       StartActivity.storageRef.child(workPlace.getName()).child(WORK_PLACE_CALLS).child(call.getCustomerNumber()).delete();
+    }
 
+    private void logOut(){
+        final FirebaseUser user = StartActivity.mFireBaseAuth.getCurrentUser();
+        final DatabaseReference dbUsers = FirebaseDatabase.getInstance()
+                .getReference().child(workPlace.getName()).child(EMPLOYEES);
+        dbUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    for(DataSnapshot dsUser : dataSnapshot.getChildren()) {
+                        Employee employee = dsUser.getValue(Employee.class);
+                        if(employee.getId().equals(user.getEmail()))
+                            dsUser.getRef().removeValue();
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        StartActivity.mFireBaseAuth.signOut();
     }
 
 
@@ -259,6 +285,8 @@ public class WorkerMain extends AppCompatActivity {
         Toast.makeText(this, R.string.logOutMessage, Toast.LENGTH_SHORT).show();
         if(counter==2){
             super.onBackPressed();
+            logOut();
         }
     }
+
 }

@@ -1,85 +1,50 @@
 package com.example.helpme;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
-import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
-
-import org.w3c.dom.Text;
+import android.widget.Toast;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 
 public class CustomerLogIn extends AppCompatActivity {
-    private static final int PERMISSION_REQUEST_CODE = 1;
     private Button logIn;
-    private ProgressBar pb;
-    private EditText cellPhoneNumberExists;
-    private Spinner spinnerExists;
-    private boolean userExists = false;
     private TextView createUserTextView;
-    public static String completeNum;
+    private EditText mailOfCustomer;
+    private EditText password;
+    private ProgressBar pbCustomer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_log_in);
         initViews();
-        initSpinner();
         logIn();
         createUser();
     }
 
     private void initViews() {
-        spinnerExists = (Spinner) findViewById(R.id.spinner_exists);
+        mailOfCustomer=findViewById(R.id.mail_of_customer);
+        password=findViewById(R.id.password);
         logIn = findViewById(R.id.login_btn);
-        pb = (ProgressBar) findViewById(R.id.pb);
-        pb.setVisibility(View.INVISIBLE);
-        cellPhoneNumberExists = (EditText) findViewById(R.id.phone_num_exists);
+        pbCustomer = findViewById(R.id.customerLogIn_pb);
         createUserTextView = (TextView) findViewById(R.id.create_user);
-    }
-
-    private void initSpinner() {
-        spinnerExists.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, CountryData.countryNames));
-    }
-
-    private void createCellPhoneNumber() {
-        String code = CountryData.countryAreaCodes[spinnerExists.getSelectedItemPosition()];
-        String number = cellPhoneNumberExists.getText().toString().trim();
-        if (number.isEmpty() || number.length() < 10) {
-            cellPhoneNumberExists.setError("Valid number is required");
-            cellPhoneNumberExists.requestFocus();
-            return;
-        }
-
-        if (number.charAt(0) == '0') {
-            number = number.substring(1);
-        }
-        completeNum = "+" + code + number;
+        pbCustomer.setVisibility(View.INVISIBLE);
     }
 
     private void logIn() {
         logIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createCellPhoneNumber();
-                pb.setVisibility(View.VISIBLE);
                 userExists();
+
             }
         });
     }
@@ -94,40 +59,32 @@ public class CustomerLogIn extends AppCompatActivity {
         });
     }
 
-    private void userExists(){
-        StartActivity.mDatabaseReferenceAuth.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-
-                for (DataSnapshot mDataSnapshot1 : dataSnapshot.getChildren()) {
-                    if (mDataSnapshot1.getValue().toString().equals(completeNum)) {
-                        userExists = true;
-//                            CustomerLogIn.completeNum = StartActivity.mFireBaseAuth.getCurrentUser().getPhoneNumber();
-                    }
-                }
-
-                if(userExists) {
-                    pb.setVisibility(View.INVISIBLE);
-                    Intent intent = new Intent(CustomerLogIn.this, ListPlacesActivity.class);
-                    startActivity(intent);
-                    finish();
-                }else{
-                    pb.setVisibility(View.INVISIBLE);
-                    if(cellPhoneNumberExists !=null) {
-                        cellPhoneNumberExists.setError("You don't exist in the system, you must register first");
-                        cellPhoneNumberExists.requestFocus();
-                    }else{
-                        cellPhoneNumberExists.setError("Valid number is required");
-                        cellPhoneNumberExists.requestFocus();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-            }
-        });
+    private void userExists() {
+        pbCustomer.setVisibility(View.VISIBLE);
+        String mail=mailOfCustomer.getText().toString().trim();
+        String cus_password=password.getText().toString();
+        if(mail.isEmpty()){
+            mailOfCustomer.setError("Invalid email");
+            mailOfCustomer.requestFocus();
+        }else if(cus_password.isEmpty()){
+            password.setError("Invalid password");
+            password.requestFocus();
+        }else{
+            StartActivity.mFireBaseAuth
+                    .signInWithEmailAndPassword(mail,cus_password)
+                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(task.isSuccessful()){
+                                Intent intent = new Intent(CustomerLogIn.this, ListPlacesActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }else{
+                                Toast.makeText(CustomerLogIn.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+        }
+        pbCustomer.setVisibility(View.INVISIBLE);
     }
 }

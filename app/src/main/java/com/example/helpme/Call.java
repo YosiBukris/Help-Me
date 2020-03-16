@@ -1,30 +1,31 @@
 package com.example.helpme;
 
-import android.graphics.Picture;
-import android.net.Uri;
-import android.widget.ImageView;
-
 import androidx.annotation.NonNull;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+
 
 public class Call implements Serializable {
-    private String customerNumber;
+    private String customerMail;
     private String pic;
     private String workerCall;
     private String token;
+    private String callUid;
 
     //massage
-    public Call(String customerNumber, String pic,String token,String callUid) {
-        this.customerNumber = customerNumber;
+    public Call(String customerMail, String pic,String token,String callUid) {
+        this.customerMail = customerMail;
         this.pic = pic;
         this.token=token;
         this.callUid=callUid;
     }
 
-    public void setCustomerNumber(String customerNumber) {
-        this.customerNumber = customerNumber;
+    public String getCustomerMail() {
+        return customerMail;
+    }
+
+    public void setCustomerMail(String customerMail) {
+        this.customerMail = customerMail;
     }
 
     public String getPic() {
@@ -43,46 +44,27 @@ public class Call implements Serializable {
         this.workerCall = workerCall;
     }
 
+    public String getToken() {
+        return token;
+    }
+
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getCallUid() {
+        return callUid;
     }
 
     public void setCallUid(String callUid) {
         this.callUid = callUid;
     }
 
-    public boolean isDone() {
-        return done;
-    }
-
-    public void setDone(boolean done) {
-        this.done = done;
-    }
-
-    private String callUid;
-    private boolean done = false;
-
-
-    public void Response(String workerName){
-        this.workerCall = workerName;
-        //now raise pop-up with worker name on customer-main activity
-        this.done = true;
-    }
-
-    public String getCustomerNumber() {
-        return customerNumber;
-    }
-    public String getToken(){
-        return this.token;
-    }
-    public String getCallUid(){
-        return this.callUid;
-    }
 
     @NonNull
     @Override
     public String toString() {
-        return customerNumber;
+        return customerMail;
     }
 }
 

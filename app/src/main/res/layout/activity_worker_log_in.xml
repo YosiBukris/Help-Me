@@ -36,8 +36,9 @@
                 android:layout_below="@id/TitleCusLog"
                 android:layout_gravity="center"
                 android:layout_marginTop="30dp"
-                android:hint="Enter Your Code/Mail"
-                android:inputType="text"
+                android:hint="Enter Your Mail"
+                android:background="@drawable/edit_round"
+                android:inputType="textEmailAddress"
                 android:shadowColor="@android:color/white"
                 android:textAlignment="center"
                 android:textSize="20dp"
@@ -52,11 +53,13 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="30dp"
                 android:hint="Enter Workplace Code"
+                android:background="@drawable/edit_round"
                 android:inputType="numberDecimal"
                 android:shadowColor="@android:color/white"
                 android:textAlignment="center"
                 android:textSize="20dp"
                 android:textStyle="bold" />
+
 
         </LinearLayout>
 
@@ -78,6 +81,13 @@
         android:layout_marginTop="60dp"
         android:layout_above="@+id/managerConnectBTN"
         android:text="Worker Page" />
+
+    <ProgressBar
+        android:id="@+id/workerLogIn_pb"
+        android:layout_below="@id/managerConnectBTN"
+        android:layout_width="100dp"
+        android:layout_height="150dp"
+        android:layout_centerInParent="true"/>
 
 
 

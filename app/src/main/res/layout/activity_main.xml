@@ -24,47 +24,32 @@
 
     <Button
         android:id="@+id/customerBTN"
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:text="CUSTOMER"
-        android:textColor="@android:color/white"
         android:background="@drawable/button_confirm2"
+        android:layout_margin="10dp"
+        android:textSize="15dp"
+        android:textColor="@android:color/black"
         android:layout_centerInParent="true"
         android:layout_centerHorizontal="true"
         tools:ignore="MissingConstraints" />
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/customerBTN"
-        android:layout_centerInParent="true"
-        android:layout_centerHorizontal="true"/>
 
     <Button
         android:id="@+id/workerBTN"
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
+        android:outlineSpotShadowColor="@android:color/white"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_below="@id/customerBTN"
-        android:background="@drawable/button_confirm"
+        android:background="@drawable/button_round"
         android:text="WORKER"
-        android:layout_marginTop="10dp"
+        android:layout_margin="10dp"
         android:layout_centerHorizontal="true"
+        android:textSize="15dp"
         android:textColor="@android:color/black"
         tools:ignore="MissingConstraints" />
 
-    <Button
-        android:id="@+id/aboutBTN"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:background="@drawable/button_cancel"
-        android:text="ABOUT"
-        android:layout_below="@id/workerBTN"
-        android:textColor="@android:color/white"
-        android:layout_centerHorizontal="true"
-        tools:ignore="MissingConstraints"
-        android:layout_marginTop="10dp" />
+
 
 </RelativeLayout>
